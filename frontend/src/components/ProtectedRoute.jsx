@@ -1,0 +1,18 @@
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context'; 
+
+const ProtectedRoute = () => {
+  const auth = useAuth();
+  console.log(auth.isAuthenticated);
+  console.log("___________________________________hereherehere")
+
+  if (!auth.isAuthenticated) {
+    // Redirect to the login page or another appropriate route if not authenticated
+    return <Navigate to="/" replace />; 
+  }
+
+  return <Outlet />; 
+};
+
+export default ProtectedRoute;

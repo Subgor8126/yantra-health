@@ -1,0 +1,40 @@
+//previous code below
+
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+
+// const AuthCallback = () => {
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const query = new URLSearchParams(window.location.search);
+//     const code = query.get("code");
+
+//     if (code) {
+//       // Send the code to the backend for token exchange
+//       fetch("/api/auth/cognito", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ code }),
+//       })
+//         .then((res) => res.json())
+//         .then((data) => {
+//           if (data.success) {
+//             // Redirect to dashboard if authentication succeeds
+//             navigate("/dashboard");
+//           } else {
+//             // Redirect to landing page with an alert
+//             alert("Authentication failed");
+//             navigate("/");
+//           }
+//         });
+//     } else {
+//       alert("No authentication code found");
+//       navigate("/");
+//     }
+//   }, [navigate]);
+
+//   return <div>Authenticating...</div>;
+// };
+
+// export default AuthCallback;
