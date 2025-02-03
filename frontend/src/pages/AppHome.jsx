@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function AppHome() {
+  console.log("in app home")
   return (
     <div>
       <h1>Welcome back!</h1>
