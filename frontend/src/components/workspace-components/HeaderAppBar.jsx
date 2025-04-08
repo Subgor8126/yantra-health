@@ -130,16 +130,6 @@ export default function HeaderAppBar() {
     }
   };
 
-  const handleStudyFolderUpload = async (dir) => {
-    if (!dir || dir.length === 0) {
-        dispatch(setSnackbar({ open: true, message: "Please select a folder first!", severity: "error" }));
-    }
-    setUploading(true);
-
-    
-
-  }
-
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -215,41 +205,6 @@ export default function HeaderAppBar() {
     </Button>
   )
 
-  const uploadStudyButton = (
-    <Button
-      component="label"
-      role={undefined}
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-      sx={{
-        "&:hover": {
-          background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
-        },
-        background: uploading
-          ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
-          : "#fc3003",
-        backgroundSize: uploading ? "300% 300%" : "auto",
-        animation: uploading ? "gradientShift 0.3s infinite linear" : "none",
-        transition: "background 0.2s ease-in-out",
-      }}
-    >
-      {uploading ? "Uploading..." : "Upload DICOM Study"}
-      <VisuallyHiddenInput
-        type="file"
-        webkitdirectory=""
-        directory="" // sometimes needed for cross-browser support
-        multiple
-        onChange={(event) => {
-          const files = Array.from(event.target.files); // All files in the folder
-          if (files.length > 0) {
-            handleStudyFolderUpload(files); // New handler for processing folder upload
-          }
-        }}
-      />
-    </Button>
-  );  
-
   const mobileMenuId = 'primary-search-account-menu-mobile';
   // This is for a mobile phone size screen. It defines a small three-dot menu to render when the screen is small enough.
   const renderMobileMenu = (
@@ -281,10 +236,7 @@ export default function HeaderAppBar() {
         <p>Profile</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {uploadButton}
-        {uploadStudyButton}
-      </Box>
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
           <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
                {snackbar.message}
@@ -333,10 +285,7 @@ export default function HeaderAppBar() {
           on the right stay aligned. */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {uploadButton}
-            {uploadStudyButton}
-          </Box>
               <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
                 <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
                     {snackbar.message}
