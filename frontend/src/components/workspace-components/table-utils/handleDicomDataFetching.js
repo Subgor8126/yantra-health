@@ -7,13 +7,14 @@ import handleDicomDelete from './handleDicomDelete';
 
 const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
 
-const handleDicomDataFetching = async (user_id) => {
+const handleDicomDataFetching = async (userId) => {
     // const dispatch = useDispatch();
     // const auth = useAuth();
     console.log("User ID VVVV")
-    console.log(user_id)
+    console.log(userId)
+    const recordType = "study";
     try {
-      const response = await fetch(`${API_BASE_URL}/api/get-data-by-uid?user_id=${user_id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/get-study-data-by-uid?userId=${userId}&recordType=${recordType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
