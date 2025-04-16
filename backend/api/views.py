@@ -147,6 +147,7 @@ def upload_dicom(request):
             "StudyDescription": get_dicom_value(first_instance_dicom_data, "StudyDescription"),
             "StudyInstanceUID": get_dicom_value(first_instance_dicom_data, "StudyInstanceUID"),
             "AccessionNumber": get_dicom_value(first_instance_dicom_data, "AccessionNumber"),
+            "StudyTime": get_dicom_value(first_instance_dicom_data, "StudyTime", "120000"),
 
             # Equipment & Acquisition Information
             "Manufacturer": get_dicom_value(first_instance_dicom_data, "Manufacturer"),
@@ -212,7 +213,7 @@ def upload_dicom(request):
 
                 # Series Information
                 "SeriesInstanceUID": series_instance_uid,
-                "SeriesNumber": get_dicom_value(dicom_ds, "SeriesNumber"),
+                "SeriesNumber": get_dicom_value(dicom_ds, "SeriesNumber", 1),
                 "SeriesDescription": get_dicom_value(dicom_ds, "SeriesDescription"),
                 "Modality": get_dicom_value(dicom_ds, "Modality", "OT"),
                 "BodyPartExamined": get_dicom_value(dicom_ds, "BodyPartExamined"),
@@ -279,7 +280,7 @@ def upload_dicom(request):
 
             # Series Information from first file (snapshot)
             "SeriesInstanceUID": get_dicom_value(first_instance_dicom_data, "SeriesInstanceUID"),
-            "SeriesNumber": get_dicom_value(first_instance_dicom_data, "SeriesNumber"),
+            "SeriesNumber": get_dicom_value(first_instance_dicom_data, "SeriesNumber", 1),
             "SeriesDescription": get_dicom_value(first_instance_dicom_data, "SeriesDescription"),
             "Modality": get_dicom_value(first_instance_dicom_data, "Modality", "OT"),
             "BodyPartExamined": get_dicom_value(first_instance_dicom_data, "BodyPartExamined"),

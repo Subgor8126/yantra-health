@@ -36,7 +36,7 @@ export default function DeleteDialog({ open, onConfirm, onCancel }) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Are you sure you want to delete this file?"}
+          {"Are you sure you want to delete this study?"}
         </DialogTitle>
         {/* <DialogContent>
           <DialogContentText id="alert-dialog-description">
