@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // mui imports
-import { TableRow, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, IconButton } from '@mui/material';
+import { Box, TableRow, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, IconButton, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 // redux imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,8 +24,8 @@ const columns = [
   { id: 'PatientName', label: 'Patient\u00a0Name', minWidth: 50, align: 'center' },
   { id: 'PatientSex', label: 'Patient\u00a0Sex', minWidth: 50, align: 'center' },
   {
-    id: 'InstanceNumber',
-    label: 'Instance\u00a0Number',
+    id: 'NumberOfInstances',
+    label: 'Number\u00a0of\u00a0Instances',
     minWidth: 100,
     align: 'center',
     format: (value) => value.toLocaleString('en-US'),
@@ -82,6 +82,7 @@ function PatientTable() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFileKey, setSelectedFileKey] = useState(null);
+  const [dataExists, setDataExists] = useState(false);
   const dispatch = useDispatch();
   const rows = useSelector((state) => state.dicomData.dicomData);
   const dicomDataRefresh = useSelector((state) => state.dicomData.refreshTable);
@@ -135,6 +136,8 @@ function PatientTable() {
       // await handleDicomDelete(selectedFileKey);
       try {
         const deleteResponse = await handleDicomDelete(userId, selectedFileKey);
+
+        console.log("HERE IS THE DELETE RESPONSE")
     
         if (deleteResponse?.DeleteText) {
           console.log(deleteResponse.DeleteText);
@@ -158,6 +161,12 @@ function PatientTable() {
   useEffect(() => {
     const fetchData = async () => {
       const fetchedData = await handleDicomDataFetching(userId);
+      if (fetchedData.length == 0){
+        setDataExists(false);
+      }
+      else{
+        setDataExists(true);
+      }
       dispatch(setDicomData(fetchedData)); // Now setting actual data, not a Promise
     };
   
@@ -166,6 +175,24 @@ function PatientTable() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      {!dataExists ? (
+      <Box
+        sx={{
+          height: '81vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          px: 2,
+        }}
+      >
+        <Typography variant="h6" color="text.primary">
+          Your workspace is empty.
+          Upload DICOM data to begin viewing studies.
+        </Typography>
+      </Box>
+    ) : (
+      <>
       <TableContainer sx={{ maxHeight: '81vh', height: '81vh' }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -260,6 +287,10 @@ function PatientTable() {
         onConfirm={handleConfirmDelete} 
         onCancel={handleCancelDelete} 
       />
+      
+      </>
+      )
+      }
     </Paper>
   );
 }

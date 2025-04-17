@@ -39,6 +39,7 @@ export default function HeaderAppBar() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingStudy, setUploadingStudy] = useState(false);
   // const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const auth = useAuth();
   const dispatch = useDispatch();
@@ -48,88 +49,177 @@ export default function HeaderAppBar() {
     console.log("selectedFile state changed, "+ (selectedFile ? "file present" : "file not present"));
   }, [selectedFile]);
 
-  const handleDicomFileUpload = async (selectedFile) => {
-    if (!selectedFile) {
-        dispatch(setSnackbar({ open: true, message: "Please select a file first!", severity: "error" }))
-        return;
+  // const handleDicomFileUpload = async (selectedFile) => {
+  //   if (!selectedFile) {
+  //       dispatch(setSnackbar({ open: true, message: "Please select a file first!", severity: "error" }))
+  //       return;
+  //   }
+
+  //   // if (selectedFile.name.split('.')[1] !== 'dcm') {
+  //   //     setSnackbar({ open: true, message: "Unsupported file format, please select a DICOM file!", severity: "error" });
+  //   //     return;
+  //   // }
+
+  //   console.log("handleDicomFileUpload called");
+  //   console.log(selectedFile ? "file present" : "file not present");
+
+  //   setUploading(true);
+  //   dispatch(setSnackbar({ open: false, message: "", severity: "success" }));
+  //   console.log("uploading:"+uploading);
+  //   console.log("snackbar:"+snackbar);
+
+  //   try {
+  //       console.log("try block");
+  //       const token = auth.user?.access_token;
+  //       console.log("token: "+token);
+  //       if (!token) throw new Error("User is not authenticated");
+  //       console.log("trying upload with token: "+token);
+
+  //       const formData = new FormData();
+  //       formData.append("file", selectedFile);
+  //       // binary data needs to be sent as FormData, not JSON, so
+
+  //       // This just sends the file to the parse-dicom api route which returns some important info about the file, just
+  //       // like the PatientID, etc. This is important because we send the PatientID to the upload-dicom route to store the
+  //       // file in the bucket at <bucket-name>/<user-id>/<patient-id>/<filename>.dcm
+  //       const dicomFileParseResponse = await fetch(`${API_BASE_URL}/api/parse-dicom`, {
+  //         method: "POST",
+  //         body: formData
+  //       })
+
+  //       const dicomData = await dicomFileParseResponse.json(); 
+  //       console.log(dicomData.data);
+        
+
+  //       const response = await fetch(`${API_BASE_URL}/api/upload-dicom`, {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+  //           body: JSON.stringify({ 
+  //             filename: selectedFile.name,
+  //             patient_id: dicomData.data.PatientID,
+  //          }),
+  //       });
+
+  //       if (!response.ok) throw new Error("Failed to get pre-signed URL");
+  //       const { upload_url } = await response.json();
+
+  //       const uploadResponse = await fetch(upload_url, {
+  //           method: "PUT",
+  //           body: selectedFile,
+  //           headers: { "Content-Type": "application/dicom" },
+  //           mode: "cors"  // This is important, it tells the browser that you're making a cross-origin request
+  //       })
+
+  //       if (!uploadResponse.ok) throw new Error("File upload failed");
+
+  //       //
+  //       setSelectedFile(null);
+
+  //       dispatch(setSnackbar({ open: true, message: "File uploaded successfully! Updating Patient Table", severity: "success" }));
+
+  //       setTimeout(() => {
+  //         dispatch(triggerRefresh());
+  //       }, 4000); // 4000ms = 4 seconds
+        
+
+  //   } catch (error) {
+  //     console.log("error block with error: "+error.message);
+  //       dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
+  //   } finally {
+  //     console.log("finally block");
+  //     setUploading(false);
+  //   }
+  // };
+
+  // const handleStudyFolderUpload = async (folderFiles) => {
+  //   if (!folderFiles || folderFiles.length === 0) {
+  //     dispatch(setSnackbar({ open: true, message: "Please select a folder first!", severity: "error" }));
+  //     return;
+  //   }
+  
+  //   setUploadingStudy(true);
+  //   dispatch(setSnackbar({ open: false, message: "", severity: "success" }));
+  
+  //   try {
+  //     const token = auth.user?.access_token;
+  //     if (!token) throw new Error("User is not authenticated");
+  
+  //     // STEP 1: Send files to Django API as FormData
+  //     const formData = new FormData();
+  //     for (const file of folderFiles) {
+  //       formData.append("files", file, file.webkitRelativePath); // use relative path!
+  //     }
+  
+  //     // Send request to /api/upload-study/
+  //     const response = await fetch(`${API_BASE_URL}/api/upload-study`, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         // Don't set Content-Type here – let browser set it (important for FormData!)
+  //       },
+  //       body: formData,
+  //     });
+  
+  //     if (!response.ok) throw new Error(`Failed to upload study`);
+  //     const result = await response.json();
+  
+  //     if (response.ok) {
+  //       dispatch(setSnackbar({ open: true, message: result.message, severity: "success" }));
+  //     } else {
+  //       dispatch(setSnackbar({ open: true, message: result.error || "Unknown error", severity: "error" }));
+  //     }
+  
+  //     setTimeout(() => {
+  //       dispatch(triggerRefresh());
+  //     }, 4000);
+  
+  //   } catch (error) {
+  //     dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
+  //   } finally {
+  //     setUploadingStudy(false);
+  //   }
+  // };  
+
+  const handleDicomUpload = async (filesArray) => {
+    if (!filesArray || filesArray.length === 0) {
+      dispatch(setSnackbar({ open: true, message: "Please select a file or folder!", severity: "error" }));
+      return;
     }
-
-    // if (selectedFile.name.split('.')[1] !== 'dcm') {
-    //     setSnackbar({ open: true, message: "Unsupported file format, please select a DICOM file!", severity: "error" });
-    //     return;
-    // }
-
-    console.log("handleDicomFileUpload called");
-    console.log(selectedFile ? "file present" : "file not present");
-
-    setUploading(true);
-    dispatch(setSnackbar({ open: false, message: "", severity: "success" }));
-    console.log("uploading:"+uploading);
-    console.log("snackbar:"+snackbar);
-
+  
+    // setUploading(true);
+  
     try {
-        console.log("try block");
-        const token = auth.user?.access_token;
-        console.log("token: "+token);
-        if (!token) throw new Error("User is not authenticated");
-        console.log("trying upload with token: "+token);
-
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        // binary data needs to be sent as FormData, not JSON, so
-
-        // This just sends the file to the parse-dicom api route which returns some important info about the file, just
-        // like the PatientID, etc. This is important because we send the PatientID to the upload-dicom route to store the
-        // file in the bucket at <bucket-name>/<user-id>/<patient-id>/<filename>.dcm
-        const dicomFileParseResponse = await fetch(`${API_BASE_URL}/api/parse-dicom`, {
-          method: "POST",
-          body: formData
-        })
-
-        const dicomData = await dicomFileParseResponse.json(); 
-        console.log(dicomData.data);
-        
-
-        const response = await fetch(`${API_BASE_URL}/api/upload-dicom`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-            body: JSON.stringify({ 
-              filename: selectedFile.name,
-              patient_id: dicomData.data.PatientID,
-           }),
-        });
-
-        if (!response.ok) throw new Error("Failed to get pre-signed URL");
-        const { upload_url } = await response.json();
-
-        const uploadResponse = await fetch(upload_url, {
-            method: "PUT",
-            body: selectedFile,
-            headers: { "Content-Type": "application/dicom" },
-            mode: "cors"  // This is important, it tells the browser that you're making a cross-origin request
-        })
-
-        if (!uploadResponse.ok) throw new Error("File upload failed");
-
-        //
-        setSelectedFile(null);
-
-        dispatch(setSnackbar({ open: true, message: "File uploaded successfully! Updating Patient Table", severity: "success" }));
-
-        setTimeout(() => {
-          dispatch(triggerRefresh());
-        }, 4000); // 4000ms = 4 seconds
-        
-
+      const token = auth.user?.access_token;
+      if (!token) throw new Error("User is not authenticated");
+  
+      const formData = new FormData();
+      for (const file of filesArray) {
+        formData.append("files", file, file.webkitRelativePath || file.name); // smart fallback
+      }
+  
+      const response = await fetch(`${API_BASE_URL}/api/upload-dicom`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) throw new Error(result.error || "Upload failed");
+  
+      dispatch(setSnackbar({ open: true, message: result.message || "Upload successful!", severity: "success" }));
+      setTimeout(() => dispatch(triggerRefresh()), 1000);
+  
     } catch (error) {
-      console.log("error block with error: "+error.message);
-        dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
+      dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
     } finally {
-      console.log("finally block");
       setUploading(false);
+      setUploadingStudy(false);
     }
   };
-
+  
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -175,35 +265,71 @@ export default function HeaderAppBar() {
   // Upload Button to use for both the mobile menu and the desktop menu.
   const uploadButton = (
     <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-            sx={{
-              "&:hover": {
-                background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
-              },
-              background: uploading
-                ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
-                : "#fc3003",
-              backgroundSize: uploading ? "300% 300%" : "auto", // Increased speed by adjusting size
-              animation: uploading ? "gradientShift 0.3s infinite linear" : "none", // Faster animation
-              transition: "background 0.2s ease-in-out",
-            }}            
-          >
-            {uploading ? "Uploading..." : "Upload DICOM File"}
-          <VisuallyHiddenInput
-              type="file"
-              onChange={(event) => {
-                const file = event.target.files[0];
-                setSelectedFile(file);
-                handleDicomFileUpload(file);
-              }}
-              multiple
-          />
+      component="label"
+      variant="contained"
+      startIcon={<CloudUploadIcon />}
+      sx={{
+        "&:hover": {
+          background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
+        },
+        background: uploading
+          ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
+          : "#fc3003",
+        backgroundSize: uploading ? "300% 300%" : "auto",
+        animation: uploading ? "gradientShift 0.3s infinite linear" : "none",
+        transition: "background 0.2s ease-in-out",
+      }}
+    >
+      {uploading ? "Uploading..." : "Upload DICOM Files"}
+      <input
+        type="file"
+        multiple
+        hidden
+        onChange={(event) => {
+          const files = Array.from(event.target.files);
+          if (files.length > 0) {
+            handleDicomUpload(files);
+            setUploading(true);
+          }
+        }}
+      />
     </Button>
-  )
+  );  
+
+  const uploadStudyButton = (
+    <Button
+      component="label"
+      variant="contained"
+      startIcon={<CloudUploadIcon />}
+      sx={{
+        "&:hover": {
+          background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
+        },
+        background: uploadingStudy
+          ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
+          : "#fc3003",
+        backgroundSize: uploadingStudy ? "300% 300%" : "auto",
+        animation: uploadingStudy ? "gradientShift 0.3s infinite linear" : "none",
+        transition: "background 0.2s ease-in-out",
+      }}
+    >
+      {uploadingStudy ? "Uploading..." : "Upload DICOM Study"}
+      <input
+        type="file"
+        webkitdirectory="true"
+        directory="true"
+        multiple
+        hidden
+        onChange={(event) => {
+          const files = Array.from(event.target.files);
+          if (files.length > 0) {
+            handleDicomUpload(files);
+            setUploadingStudy(true);
+          }
+        }}
+      />
+    </Button>
+  );   
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   // This is for a mobile phone size screen. It defines a small three-dot menu to render when the screen is small enough.
@@ -236,7 +362,10 @@ export default function HeaderAppBar() {
         <p>Profile</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {uploadButton}
+        {uploadStudyButton}
+      </Box>
       <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
           <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
                {snackbar.message}
@@ -285,7 +414,10 @@ export default function HeaderAppBar() {
           on the right stay aligned. */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {uploadButton}
+            {uploadStudyButton}
+          </Box>
               <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
                 <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
                     {snackbar.message}
