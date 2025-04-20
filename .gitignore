@@ -30,5 +30,6 @@ __pycache__/
 backend/mirvenv/
 
 # Environment variable files
+**/.env
 **/.env*
 !**/.env.example
