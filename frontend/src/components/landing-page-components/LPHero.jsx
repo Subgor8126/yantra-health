@@ -2,10 +2,10 @@ import { Box, Typography, Button, Container, InputLabel, Link, Stack, TextField 
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import { styled } from '@mui/material/styles';
 import StyledBox from "../../assets/lp/StyledBox";
-import { useAuth } from "react-oidc-context";
+import { useAuthCustom } from "react-oidc-context";
 
 function LPHero(){
-    const auth = useAuth();
+    const auth = useAuthCustom();
 
     return(
         <Box

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   Typography, 
@@ -24,6 +24,9 @@ import {
   Search as SearchIcon,
   MoreVert as MoreVertIcon
 } from '@mui/icons-material';
+import { useAuthCustom } from "../hooks/useAuthCustom"; // Custom hook for authentication
+import { useDispatch } from "react-redux";
+import { setSnackbar } from "../redux/slices/snackbarSlice"; // Redux action for snackbar
 
 function AppHome() {
   const [recentStudies] = useState([
@@ -31,12 +34,21 @@ function AppHome() {
     { id: 2, patientId: "PAT-4567", studyDate: "2025-03-10", modality: "MR", images: 56 }
   ]);
 
+  const auth = useAuthCustom();
+  const dispatch = useDispatch();
+
   // Dummy handler functions
   const handleUpload = () => console.log("Upload initiated");
   const handleSearch = () => console.log("Search initiated");
   const handleNotifications = () => console.log("Notifications opened");
   const handleBookmark = (studyId) => console.log("Bookmarked study", studyId);
   const handleMoreOptions = (studyId) => console.log("More options for study", studyId);
+
+  useEffect(() => {
+    if (auth.isGuest){
+      dispatch(setSnackbar({ open: true, message: "Logged in as guest with limited usage privileges", severity: "success" }));
+    }
+  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>

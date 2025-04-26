@@ -29,15 +29,15 @@ import {
   FileCopy
 } from '@mui/icons-material';
 import { XrayIcon } from './details_page_utils/XrayIcon';
-import { useAuth } from 'react-oidc-context';
+import { useAuthCustom } from '../../hooks/useAuthCustom';
 
 const PatientDetails = () => {
   const { patientId } = useParams();
   const patientData = useSelector((state) => state.patient.patient);
   const navigate = useNavigate();
-  const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
-  const auth = useAuth();
-  const userId = auth.user?.profile?.sub
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const auth = useAuthCustom();
+  const userId = auth.userId
 
   const handleViewInOHIF = async () => {
     // Placeholder for OHIF viewer navigation

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuthCustom } from "react-oidc-context";
 import { useNavigate } from "react-router-dom";
 import exchangeCodeForTokens from "../utils/exchangeCodeForTokens";
 
 const AuthCallback = () => {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   console.log(auth);
   const navigate = useNavigate();
   useEffect(() => {

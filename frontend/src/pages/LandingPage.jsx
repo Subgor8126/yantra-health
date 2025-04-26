@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "react-oidc-context";
+import { useAuthCustom } from '../hooks/useAuthCustom';
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -14,7 +14,8 @@ import {
   Avatar,
   useTheme,
   Divider,
-  Stack
+  Stack,
+  CircularProgress
 } from "@mui/material";
 import { 
   CloudUpload as CloudUploadIcon,
@@ -28,11 +29,16 @@ import {
 // This component replaces your LPHero component
 const LPHero = () => {
   const theme = useTheme();
-  const auth = useAuth();
+  const auth = useAuthCustom();
   
   const handleSignIn = () => {
-    auth.signinRedirect();
+    auth.login();
   };
+
+  const handleGuestSignIn = () => {
+    auth.loginAsGuest();
+    console.log("Guest login initiated");
+  }
   
   const features = [
     {
@@ -135,6 +141,7 @@ const LPHero = () => {
                 </Button>
                 <Button 
                   variant="outlined" 
+                  onClick={handleGuestSignIn}
                   sx={{ 
                     borderRadius: 2,
                     borderColor: 'white',
@@ -147,7 +154,7 @@ const LPHero = () => {
                     }
                   }}
                 >
-                  Learn More
+                  Try as Guest
                 </Button>
               </Stack>
             </Grid>
@@ -452,19 +459,19 @@ const LPHero = () => {
 };
 
 function LandingPage() {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     // Handling authentication logic
-    if (auth.isAuthenticated && auth.user?.access_token) {
+    if (auth.isAuthenticated && auth.tokens?.access_token) {
       console.log("Got them goddamn tokens");
 
       const tokens = {
-        access_token: auth.user?.access_token,
-        refresh_token: auth.user?.refresh_token,
-        id_token: auth.user?.id_token
+        access_token: auth.tokens.access_token,
+        refresh_token: auth.tokens.refresh_token,
+        id_token: auth.tokens.id_token
       };
 
       console.log(`Authentication successful:
@@ -499,7 +506,17 @@ function LandingPage() {
         backgroundColor: 'background.default',
         color: 'text.primary'
       }}>
-        <Typography variant="h5">Authenticating, Please Wait...</Typography>
+          <Box 
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2,
+          }}
+          >
+          <CircularProgress color="primary" size="3rem" />
+          <Typography variant="h5">Please Wait</Typography>
+        </Box>
       </Box>
     )
   }
@@ -512,7 +529,7 @@ export default LandingPage;
 
 // Original UI
 // import React from "react";
-// import { useAuth } from "react-oidc-context";
+// import { useAuthCustom } from "react-oidc-context";
 // import { useEffect, useState } from "react";
 // import { useNavigate, useLocation } from "react-router-dom";
 // import { Box, Typography, Button, Container, InputLabel, Link, Stack, TextField } from "@mui/material";
@@ -523,7 +540,7 @@ export default LandingPage;
 
 // function LandingPage() {
 
-//   const auth = useAuth();
+//   const auth = useAuthCustom();
 //   const navigate = useNavigate();
 //   const location = useLocation();
 

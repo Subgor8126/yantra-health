@@ -10,7 +10,7 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Search, SearchIconWrapper, StyledInputBase } from './search-bar-utils';
-import { useAuth } from 'react-oidc-context';
+import { useAuthCustom } from '../../hooks/useAuthCustom';
 import { triggerRefresh } from '../../redux/slices/dicomDataSlice';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
@@ -41,12 +41,12 @@ export default function HeaderAppBar() {
   const [uploading, setUploading] = useState(false);
   const [uploadingStudy, setUploadingStudy] = useState(false);
   // const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const auth = useAuth();
-  const dispatch = useDispatch();
-  const snackbar = useSelector((state) => state.snackbar?.snackbarState || { open: false, message: '', severity: 'success' });
+  const auth = useAuthCustom();
 
   React.useEffect(() => {
     console.log("selectedFile state changed, "+ (selectedFile ? "file present" : "file not present"));
+    console.log(auth.user?.username);
+    console.log(auth.user);
   }, [selectedFile]);
 
   // const handleDicomFileUpload = async (selectedFile) => {
@@ -189,8 +189,9 @@ export default function HeaderAppBar() {
     // setUploading(true);
   
     try {
-      const token = auth.user?.access_token;
+      const token = auth.tokens.access_token;
       if (!token) throw new Error("User is not authenticated");
+      setUploading(false);
   
       const formData = new FormData();
       for (const file of filesArray) {
@@ -240,28 +241,6 @@ export default function HeaderAppBar() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const menuId = 'primary-search-account-menu';
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
-
   // Upload Button to use for both the mobile menu and the desktop menu.
   const uploadButton = (
     <Button
@@ -269,14 +248,23 @@ export default function HeaderAppBar() {
       variant="contained"
       startIcon={<CloudUploadIcon />}
       sx={{
+        "@keyframes gradientShift": {
+          "0%": {
+            backgroundPosition: "0% 50%",
+          },
+          "100%": {
+            backgroundPosition: "100% 50%",
+          }
+        },
         "&:hover": {
-          background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
+          background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))",
         },
         background: uploading
           ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
           : "#fc3003",
         backgroundSize: uploading ? "300% 300%" : "auto",
-        animation: uploading ? "gradientShift 0.3s infinite linear" : "none",
+        animation: uploading ? "gradientShift 1s infinite linear" : "none",
+        willChange: uploading ? "background-position" : "auto",
         transition: "background 0.2s ease-in-out",
       }}
     >
@@ -290,6 +278,7 @@ export default function HeaderAppBar() {
           if (files.length > 0) {
             handleDicomUpload(files);
             setUploading(true);
+            event.target.value = null; // Reset the input value to allow re-uploading the same file
           }
         }}
       />
@@ -329,7 +318,84 @@ export default function HeaderAppBar() {
         }}
       />
     </Button>
-  );   
+  );
+
+  const logoutButton = (
+    <Button
+      component="label"
+      variant="contained"
+      onClick={() => {
+        auth.logout(); 
+        dispatch(setSnackbar({ open: true, message: "Logged out successfully!", severity: "success" }));
+      }}
+      sx={{
+        "&:hover": {
+          background: "linear-gradient(270deg,rgb(230, 3, 3), rgb(0, 0, 0))"
+        },
+        background: "rgb(230, 3, 3)",
+        backgroundSize: uploadingStudy ? "300% 300%" : "auto",
+        animation: uploadingStudy ? "gradientShift 0.3s infinite linear" : "none",
+        transition: "background 0.2s ease-in-out",
+      }}
+    >
+      Log Out
+    </Button>
+  );
+
+  const signInForGuestButton = (
+    <Box
+      
+    >
+      <Button
+        variant="contained"
+        onClick={auth.login} // 👈 your existing normal login redirect
+        sx={{
+          fontWeight: 'bold',
+          boxShadow: 3,
+          borderRadius: 2,
+          "&:hover": {
+            background: "linear-gradient(270deg,rgb(230, 3, 3), rgb(0, 89, 255))"
+          },
+          background: "rgb(230, 3, 3)",
+        }}
+      >
+        Sign in to Upload or Delete Files
+      </Button>
+    </Box>
+  );
+
+  const menuId = 'primary-search-account-menu';
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      id={menuId}
+      keepMounted
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          p: 1,
+        }}
+      >
+        {logoutButton}
+      </Box>
+    </Menu>
+  );
+  
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
   // This is for a mobile phone size screen. It defines a small three-dot menu to render when the screen is small enough.
@@ -362,15 +428,14 @@ export default function HeaderAppBar() {
         <p>Profile</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      {auth.isGuest ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {signInForGuestButton}
+        </Box>
+      ) : (<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {uploadButton}
         {uploadStudyButton}
-      </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
-          <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
-               {snackbar.message}
-          </Alert>
-      </Snackbar>
+      </Box>)}
       </MenuItem>
     </Menu>
   );
@@ -414,15 +479,14 @@ export default function HeaderAppBar() {
           on the right stay aligned. */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {auth.isGuest ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {signInForGuestButton}
+            </Box>
+          ) : (<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             {uploadButton}
             {uploadStudyButton}
-          </Box>
-              <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))}>
-                <Alert onClose={() => dispatch(setSnackbar({ ...snackbar, open: false }))} severity={snackbar.severity}>
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+          </Box>)}
             <IconButton
               size="large"
               edge="end"
