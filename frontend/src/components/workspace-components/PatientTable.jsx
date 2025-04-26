@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // mui imports
-import { Box, TableRow, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, IconButton, Typography } from '@mui/material';
+import { Box, TableRow, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, IconButton, Typography, LinearProgress } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 // redux imports
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,11 +15,12 @@ import { handleDicomDelete } from './table-utils';
 import DeleteDialog from './table-utils/DeleteDialog';
 import { formatName, formatDate } from './table-utils';
 // auth imports
-import { useAuth } from 'react-oidc-context';
+import { useAuthCustom } from '../../hooks/useAuthCustom';
 import { setSnackbar } from '../../redux/slices/snackbarSlice';
 
+const isAuthGuest = localStorage.getItem('isGuest') === 'true';
 
-const columns = [
+const baseColumns = [
   { id: 'PatientID', label: 'Patient\u00a0ID', minWidth: 50, align: 'center' },
   { id: 'PatientName', label: 'Patient\u00a0Name', minWidth: 50, align: 'center' },
   { id: 'PatientSex', label: 'Patient\u00a0Sex', minWidth: 50, align: 'center' },
@@ -65,24 +66,27 @@ const columns = [
   //   align: 'right',
   //   format: (value) => value.toLocaleString('en-US'),
   // },
-  {
-    id: 'DeleteStudyButton',
-    label: 'Delete\u00a0Study',
-    minWidth: 100,
-    align: 'center',
-
-  }
 ];
 
+const columns = isAuthGuest
+  ? baseColumns
+  : [...baseColumns, {
+      id: 'DeleteStudyButton',
+      label: 'Delete\u00a0Study',
+      minWidth: 100,
+      align: 'center',
+    }];
+
 function PatientTable() {
-  const auth = useAuth();
-  const userId = auth.user?.profile?.sub
+  const auth = useAuthCustom();
+  const userId = auth.userId
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedFileKey, setSelectedFileKey] = useState(null);
   const [dataExists, setDataExists] = useState(false);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const rows = useSelector((state) => state.dicomData.dicomData);
   const dicomDataRefresh = useSelector((state) => state.dicomData.refreshTable);
@@ -159,39 +163,48 @@ function PatientTable() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const fetchedData = await handleDicomDataFetching(userId);
-      if (fetchedData.length == 0){
-        setDataExists(false);
-      }
-      else{
-        setDataExists(true);
-      }
-      dispatch(setDicomData(fetchedData)); // Now setting actual data, not a Promise
-    };
+      if (!userId) return;
+    
+      const fetchData = async () => {
+        setLoading(true); // <-- start loading
+    
+        const fetchedData = await handleDicomDataFetching(userId);
+    
+        if (fetchedData.length === 0) {
+          setDataExists(false);
+        } else {
+          setDataExists(true);
+        }
+        dispatch(setDicomData(fetchedData));
+    
+        setLoading(false); // <-- loading finished
+      };
+    
+      fetchData();
+    }, [dicomDataRefresh, userId]);
   
-    fetchData();
-  }, [dicomDataRefresh]);
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      {!dataExists ? (
+      {loading ? (
       <Box
         sx={{
           height: '81vh',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           textAlign: 'center',
           px: 2,
+          gap: 2,
         }}
       >
+        <LinearProgress sx={{ width: '300px', mb: 2 }} color="primary" />
         <Typography variant="h6" color="text.primary">
-          Your workspace is empty.
-          Upload DICOM data to begin viewing studies.
+          Please Wait, Fetching DICOM Data...
         </Typography>
       </Box>
-    ) : (
+    ) : dataExists ? (
       <>
       <TableContainer sx={{ maxHeight: '81vh', height: '81vh' }}>
         <Table stickyHeader aria-label="sticky table">
@@ -289,8 +302,24 @@ function PatientTable() {
       />
       
       </>
-      )
-      }
+      ) : (
+        <Box
+          sx={{
+            height: '81vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            px: 2,
+            gap: 2,
+          }}
+        >
+          <Typography variant="h6" color="text.primary">
+            No DICOM Data Available. Please upload to view studies.
+          </Typography>
+        </Box>
+      )}
     </Paper>
   );
 }

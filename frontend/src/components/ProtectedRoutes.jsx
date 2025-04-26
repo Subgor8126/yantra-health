@@ -1,9 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context'; 
 
-const ProtectedRoutes = () => {
-  const auth = useAuth();
+const ProtectedRoutes = ({auth}) => {
   console.log(auth.isAuthenticated);
   console.log("___________________________________hereherehereinprotectedroutes");
 

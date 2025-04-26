@@ -1,33 +1,48 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
+import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
 
 export default defineConfig(({ command }) => {
+  const commonConfig = {
+    plugins: [react()],
+    define: {
+      global: 'globalThis',
+    },
+    optimizeDeps: {
+      include: ['buffer'],
+    },
+    build: {
+      rollupOptions: {
+        plugins: [rollupNodePolyFill()],
+      },
+    },
+  };
+
   if (command === 'serve') {
     // Development settings
     return {
-      plugins: [react()],
-      // Use a relative base for dev
+      ...commonConfig,
       base: '/',
       server: {
-        // Proxy API calls to your Django backend running on localhost:8000
         proxy: {
           '/api': 'http://localhost:8000',
         },
       },
-    }
+    };
   } else {
     // Production build settings
     return {
-      plugins: [react()],
+      ...commonConfig,
       base: '/static',
       build: {
-        outDir: '../core/static/react',  // Output directory for Django
-        emptyOutDir: true,              // Clear the output directory before building
-        minify: false
+        ...commonConfig.build,
+        outDir: '../core/static/react',
+        emptyOutDir: true,
+        minify: false,
       },
-    }
+    };
   }
-})
+});
 
 // export default defineConfig({
 //   plugins: [react()],

@@ -12931,15 +12931,15 @@ var AuthProvider = (props) => {
   }, [state, userManagerContext, removeUser]);
   return /* @__PURE__ */ React.createElement(AuthContext.Provider, { value: contextValue }, children);
 };
-var useAuth = () => {
+var useAuthCustom = () => {
   const context = React.useContext(AuthContext);
   if (!context) {
-    console.warn("AuthProvider context is undefined, please verify you are calling useAuth() as child of a <AuthProvider> component.");
+    console.warn("AuthProvider context is undefined, please verify you are calling useAuthCustom() as child of a <AuthProvider> component.");
   }
   return context;
 };
 const ProtectedRoutes = () => {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   console.log(auth.isAuthenticated);
   console.log("___________________________________hereherehereinprotectedroutes");
   return auth.isAuthenticated ? /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) : /* @__PURE__ */ jsxRuntimeExports.jsx(Navigate, { to: "/", replace: true });
@@ -30351,7 +30351,7 @@ styled("div")(({ theme: theme2 }) => ({
   })
 }));
 function LPHero() {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     Box,
     {
@@ -30450,7 +30450,7 @@ function LPHero() {
   );
 }
 function LandingPage() {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   const navigate = useNavigate();
   const location = useLocation();
   reactExports.useEffect(() => {
@@ -32396,7 +32396,7 @@ function PatientTable() {
   const navigate = useNavigate();
   const rows = useSelector((state) => state.dicomData.dicomData);
   const dicomDataRefresh = useSelector((state) => state.dicomData.refreshTable);
-  const auth = useAuth();
+  const auth = useAuthCustom();
   const [deleteDialogOpen, setDeleteDialogOpen] = reactExports.useState(false);
   const [selectedFileKey, setSelectedFileKey] = reactExports.useState(null);
   const userId = (_b = (_a = auth.user) == null ? void 0 : _a.profile) == null ? void 0 : _b.sub;
@@ -32580,7 +32580,7 @@ function HeaderAppBar() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = reactExports.useState(null);
   const [selectedFile, setSelectedFile] = reactExports.useState(null);
   const [uploading, setUploading] = reactExports.useState(false);
-  const auth = useAuth();
+  const auth = useAuthCustom();
   const dispatch = useDispatch();
   const snackbar = useSelector((state) => {
     var _a;
@@ -33094,7 +33094,7 @@ const theme = createTheme({
   }
 });
 function App() {
-  const auth = useAuth();
+  const auth = useAuthCustom();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(ThemeProvider, { theme, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(CssBaseline, {}),
     " ",
