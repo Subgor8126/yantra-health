@@ -106,7 +106,7 @@ const PatientDetails = () => {
   }
 
   return (
-    <Box sx={{ p: 3, mx: 'auto', background: 'linear-gradient(90deg, rgb(102, 8, 82) 30%, rgb(9, 255, 214) 70%)' }}>
+    <Box sx={{ p: 3, mx: 'auto', background: 'linear-gradient(90deg, #300030, #440044, #660033)', height: '100vh' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <IconButton onClick={() => navigate(-1)} sx={{ mr: 2, color: "white" }}>
             <ArrowBack />
@@ -307,62 +307,6 @@ const PatientDetails = () => {
                     </Typography>
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          {/* <Grid item xs={12}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" component="h2" gutterBottom>
-                  File Information
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <FileCopy fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        File Path
-                      </Typography>
-                    </Box>
-                    <Link
-                      component="button"
-                      variant="body1"
-                      onClick={handleFilePathClick}
-                      sx={{ 
-                        wordBreak: 'break-all',
-                        bgcolor: 'grey.100',
-                        p: 1,
-                        borderRadius: 1,
-                        fontFamily: 'monospace',
-                        display: 'block',
-                        textAlign: 'left',
-                        width: '100%',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                          bgcolor: 'grey.200'
-                        }
-                      }}
-                    >
-                      {patientData.FileKey || 'Not Available'}
-                    </Link>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid> */}
-          
-          {/* Preserving your original display of raw JSON data */}
-          <Grid item xs={12}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" component="h2" gutterBottom>
-                  Raw Patient Data
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <pre>{JSON.stringify(patientData, null, 2)}</pre>
               </CardContent>
             </Card>
           </Grid>

@@ -78,6 +78,7 @@ export const useAuthCustom = () => {
     localStorage.removeItem("isGuest");
     setGuestUser(null);
     setGuestTokens(null);
+    sessionStorage.clear();
     await signOut();
     // oidc.signoutRedirect();
     window.location.href = '/';

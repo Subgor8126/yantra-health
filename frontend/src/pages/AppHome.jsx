@@ -56,19 +56,11 @@ function AppHome() {
       <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Welcome back!
+            Dashboard
           </Typography>
           {/* <Typography variant="subtitle1" color="text.secondary">
             Your cloud DICOM server is running normally
           </Typography> */}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <IconButton color="primary" onClick={handleSearch} sx={{ bgcolor: 'background.paper' }}>
-            <SearchIcon />
-          </IconButton>
-          <IconButton color="primary" onClick={handleNotifications} sx={{ bgcolor: 'background.paper' }}>
-            <NotificationsIcon />
-          </IconButton>
         </Box>
       </Box>
 
@@ -128,58 +120,6 @@ function AppHome() {
         </Grid>
       </Grid>
 
-      {/* Recent studies section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>Recent Studies</Typography>
-        <Grid container spacing={2}>
-          {recentStudies.map(study => (
-            <Grid item xs={12} sm={6} key={study.id}>
-              <Card elevation={1} sx={{ bgcolor: 'background.paper' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6">{study.patientId}</Typography>
-                    <Chip 
-                      label={study.modality} 
-                      size="small" 
-                      color="primary" 
-                      sx={{ fontWeight: 'bold' }}
-                    />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Study Date: {study.studyDate}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                    <ImageIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {study.images} images
-                    </Typography>
-                  </Box>
-                </CardContent>
-                <Divider />
-                <CardActions sx={{ justifyContent: 'space-between' }}>
-                  <Button 
-                    size="small" 
-                    component={Link} 
-                    to={`/app/workspace/${study.id}`}
-                    variant="contained"
-                  >
-                    View Study
-                  </Button>
-                  <Box>
-                    <IconButton size="small" onClick={() => handleBookmark(study.id)}>
-                      <BookmarkIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleMoreOptions(study.id)}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
       {/* Statistics summary */}
       <Paper elevation={1} sx={{ p: 3, bgcolor: 'background.paper' }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Storage Summary</Typography>
@@ -202,6 +142,7 @@ function AppHome() {
           </Grid>
         </Grid>
       </Paper>
+      
     </Container>
   );
 }

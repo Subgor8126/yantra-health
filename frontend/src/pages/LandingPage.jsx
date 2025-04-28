@@ -122,9 +122,9 @@ const LPHero = () => {
               <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
                 Secure, scalable, and accessible medical imaging storage
               </Typography>
-              <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
+              {/* <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
                 Store, view, and share DICOM files with ease. Our platform provides healthcare professionals with instant access to medical images from anywhere, on any device.
-              </Typography>
+              </Typography> */}
               <Stack direction="row" spacing={2}>
                 <Button 
                   variant="contained" 
