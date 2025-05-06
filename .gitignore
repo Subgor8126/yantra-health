@@ -34,4 +34,4 @@ backend/mirvenv/
 **/.env*
 !**/.env.example
 
-static/
+/static/
