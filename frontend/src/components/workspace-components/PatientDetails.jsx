@@ -64,7 +64,7 @@ const PatientDetails = () => {
     // const JsonResponseUrl = encodeURIComponent('https://yantra-healthcare-imaging.s3.amazonaws.com/04989458-2081-70ba-7740-7ec9c9f34b66/8155012288/2-1.dcm?AWSAccessKeyId=AKIA6GBMICYNHJQZOPAV&Signature=uIwfvI3qM2p0mAL%2BDiNHQwJ85kc%3D&Expires=1742540396');
 
      // Construct OHIF Viewer URL using `wadouri:` to indicate raw DICOM file
-     const ohifViewerUrl = `http://localhost:3000/viewer?StudyInstanceUIDs=${patientData?.StudyInstanceUID}`;
+     const ohifViewerUrl = `${import.meta.env.VITE_OHIF_URL}/viewer?StudyInstanceUIDs=${patientData?.StudyInstanceUID}`;
 
      console.log("OHIF Viewer URL:", ohifViewerUrl);
 
