@@ -33,10 +33,9 @@ export default defineConfig(({ command }) => {
     // Production build settings
     return {
       ...commonConfig,
-      base: '/static',
       build: {
         ...commonConfig.build,
-        outDir: '../core/static/react',
+        outDir: 'dist',
         emptyOutDir: true,
         minify: false,
       },
