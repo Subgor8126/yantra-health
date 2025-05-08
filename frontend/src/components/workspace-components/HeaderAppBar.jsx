@@ -24,7 +24,7 @@ import ProfilePage from './ProfilePage';
 import { useNavigate } from 'react-router-dom';
 
 export default function EnhancedHeader() {
-  const API_BASE_URL = import.meta.env.API_URL || "http://localhost:8000";
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -439,7 +439,7 @@ export default function EnhancedHeader() {
 // });
 
 // export default function HeaderAppBar() {
-//   const API_BASE_URL = import.meta.env.API_URL || "http://localhost:8000";
+//   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 //   const [anchorEl, setAnchorEl] = useState(null);
 //   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 //   const [selectedFile, setSelectedFile] = useState(null);

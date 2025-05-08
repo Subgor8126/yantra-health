@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import handleDicomDelete from './handleDicomDelete';
 
-const API_BASE_URL = import.meta.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const handleDicomDataFetching = async (userId) => {
     // const dispatch = useDispatch();
