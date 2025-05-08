@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from .s3_utils import generate_pre_signed_url_with_file_key
 import requests
 import boto3
+from .ddb_utils import get_dynamodb_resource
 
-dynamodb = boto3.resource("dynamodb")
 DYNAMO_TABLE_NAME = "dicomFileMetadataTable"
 
 @csrf_exempt
@@ -23,7 +23,8 @@ def send_json_response_to_ohif(request):
         print(f"Fetching metadata for fileKey: {file_key}")
 
         # Query DynamoDB using FileKey
-        table = dynamodb.Table(DYNAMO_TABLE_NAME)
+        dynamodb_resource = get_dynamodb_resource()
+        table = dynamodb_resource.Table(DYNAMO_TABLE_NAME)
         response = table.get_item(Key={"UserID": user_id, "FileKey": file_key})
 
         if "Item" not in response:
@@ -122,7 +123,7 @@ def send_json_response_to_ohif(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 @csrf_exempt
-def print_something():
+def print_something(request):
     return JsonResponse({"ITurnTheMusicUp": "IGotMyRecordsOn"}, status=200)
 
 def generate_pre_signed_url_for_ohif(file_key):

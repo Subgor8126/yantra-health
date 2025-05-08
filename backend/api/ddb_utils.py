@@ -4,8 +4,13 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+import os
 
-dynamodb = boto3.resource("dynamodb")
+def get_dynamodb_resource():
+    return boto3.resource(
+        "dynamodb",
+        region_name=os.getenv("AWS_REGION")    
+    )
 
 @csrf_exempt
 def get_study_data_by_uid(request):
@@ -15,8 +20,9 @@ def get_study_data_by_uid(request):
 
         if not user_id or not record_type:
             return JsonResponse({"error": "Missing required parameters: userId and/or recordType"}, status=400)
-
-        dicom_data_table = dynamodb.Table("dicomFileMetadataTable")
+        
+        dynamodb_resource = get_dynamodb_resource()
+        dicom_data_table = dynamodb_resource.Table("dicomFileMetadataTable")
         response = dicom_data_table.query(
             KeyConditionExpression=Key('UserID').eq(user_id),
             FilterExpression=Attr('DataType').eq(record_type)

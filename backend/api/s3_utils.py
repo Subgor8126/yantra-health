@@ -5,7 +5,8 @@ from botocore.exceptions import NoCredentialsError
 S3_BUCKET = os.getenv("AWS_STORAGE_BUCKET_NAME", "yantra-healthcare-imaging")
 S3_REGION = os.getenv("AWS_S3_REGION", "us-east-1")
 
-s3_client = boto3.client("s3", region_name=S3_REGION)
+def get_s3_client():
+    return boto3.client("s3", region_name=S3_REGION)
 
 def generate_and_return_presigned_url(filename, user_id, patient_id, expiration=1800):
     """
@@ -21,6 +22,8 @@ def generate_and_return_presigned_url(filename, user_id, patient_id, expiration=
     object_key = f"{user_id}/{patient_id_str}/{filename}"
     print(object_key)
 
+    s3_client = get_s3_client()
+
     try:
         upload_url = s3_client.generate_presigned_url(
             "put_object",
@@ -33,6 +36,7 @@ def generate_and_return_presigned_url(filename, user_id, patient_id, expiration=
 
 def generate_pre_signed_url_with_file_key(file_key):
     expiration=1800
+    s3_client = get_s3_client()
     try:
         pre_signed_url = s3_client.generate_presigned_url(
             "get_object",

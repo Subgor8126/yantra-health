@@ -1,8 +1,9 @@
 import boto3
 from boto3.dynamodb.conditions import Key
 import os
+from .ddb_utils import get_dynamodb_resource
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = get_dynamodb_resource()
 table = dynamodb.Table('dicomFileMetadataTable')
 
 response = table.query(

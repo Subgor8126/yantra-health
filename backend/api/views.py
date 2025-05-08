@@ -13,6 +13,8 @@ import os
 import zipfile
 import hashlib
 from decimal import Decimal
+from .ddb_utils import get_dynamodb_resource
+from .s3_utils import get_s3_client
 
 def get_dicom_value(dicom_data, attribute, default="Unknown"):
     """Safely fetches a DICOM attribute as a string."""
@@ -116,9 +118,9 @@ def upload_dicom(request):
         # if not is_valid:
         #     return JsonResponse({"error": message}, status=400)
         
-        s3 = boto3.client("s3")
+        s3 = get_s3_client()
         bucket = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-        dynamodb = boto3.resource("dynamodb")
+        dynamodb = get_dynamodb_resource()
         table = dynamodb.Table(os.environ.get("DICOM_DYNAMO_TABLE"))     
 
         sop_uid_list = []

@@ -4,12 +4,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import boto3
 import os
+from .ddb_utils import get_dynamodb_resource
+from .s3_utils import get_s3_client
 
 S3_BUCKET = os.getenv("AWS_STORAGE_BUCKET_NAME", "yantra-healthcare-imaging")
 S3_REGION = os.getenv("AWS_S3_REGION", "us-east-1")
-s3_client = boto3.client("s3", region_name=S3_REGION)
-
-dynamodb = boto3.resource("dynamodb")
 
 @csrf_exempt
 def delete_data_by_file_key(request):
@@ -17,7 +16,8 @@ def delete_data_by_file_key(request):
     user_id = request.GET.get("userId")  # Accept UserID from request
 
     try:
-        dicom_data_table = dynamodb.Table("dicomFileMetadataTable")
+        dynamodb_resource = get_dynamodb_resource()
+        dicom_data_table = dynamodb_resource.Table("dicomFileMetadataTable")
         # Step 1: Delete the study record
         response = dicom_data_table.delete_item(
             Key={'UserID': user_id, 'FileKey': file_key},
@@ -76,11 +76,13 @@ def delete_data_by_file_key(request):
         return JsonResponse({"error": f"Failed to delete DICOM data: {str(e)}"}, status=500)
 
 def delete_file_from_s3(file_key):
+    s3_client = get_s3_client()
     response = s3_client.delete_object(Bucket=S3_BUCKET, Key=file_key)
     return response.get('ResponseMetadata', {})
 
 def delete_s3_prefix(prefix):
     """Deletes all S3 objects under a given key prefix."""
+    s3_client = get_s3_client()
     paginator = s3_client.get_paginator('list_objects_v2')
     pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=prefix)
 
