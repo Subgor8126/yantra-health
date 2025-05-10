@@ -1,18 +1,32 @@
 name: Build and Push Docker Images to ECR
+# name: The workflow name shown in GitHub Actions UI.
 
 on:
   push:
     branches:
       - production
 
+# on: Specifies the event that triggers the workflow.
+# Here: only runs when you git push to the production branch.
+# This workflow runs only when you push to the production branch.
+
 jobs:
   build-and-push:
     name: Build & Push Backend and Frontend
     runs-on: ubuntu-latest
 
+# jobs: Defines what to do.
+# build-and-push: The name of this job (you can name it anything).
+# runs-on: The VM/environment to run on. ubuntu-latest gives you a Linux machine.
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # steps: List of actions to perform in the job.
+      # - name: Human-readable label.
+      # uses: Means you're calling a reusable GitHub Action.
+      # In this case, actions/checkout@v3 checks out your code.
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -21,9 +35,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # 🔐 Authenticates with AWS using GitHub Secrets
+      # Lets you run AWS CLI commands
+      # Required to log in to ECR and push images
+      # with: Used to pass inputs to the action
+      # ${{ secrets.X }}: Fetches values from GitHub Secrets
+
       - name: Log in to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_BACKEND_URI }}
+
+      # 🔑 Logs into ECR
+      # ECR requires Docker authentication
+      # This command gets a token and pipes it into docker login
+      # : Runs a shell command in the VM.
+      # | is YAML syntax for a multi-line block.
 
       - name: Build Backend Image
         run: |
@@ -31,8 +57,23 @@ jobs:
           docker tag backend-image ${{ secrets.ECR_BACKEND_URI }}:latest
           docker push ${{ secrets.ECR_BACKEND_URI }}:latest
 
+      # 🐳 Builds, tags, and pushes your backend container
+
       - name: Build Frontend Image
         run: |
-          docker build -t frontend-image ./frontend
+          docker build \
+            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+            --build-arg VITE_COGNITO_USER_POOL_ID=${{ secrets.VITE_COGNITO_USER_POOL_ID }} \
+            --build-arg VITE_COGNITO_CLIENT_ID=${{ secrets.VITE_COGNITO_CLIENT_ID }} \
+            --build-arg VITE_AWS_REGION=${{ secrets.VITE_AWS_REGION }} \
+            --build-arg VITE_COGNITO_DOMAIN=${{ secrets.VITE_COGNITO_DOMAIN }} \
+            --build-arg VITE_COGNITO_REDIRECT_URI=${{ secrets.VITE_COGNITO_REDIRECT_URI }} \
+            --build-arg VITE_COGNITO_RESPONSE_TYPE=${{ secrets.VITE_COGNITO_RESPONSE_TYPE }} \
+            --build-arg VITE_OHIF_URL=${{ secrets.VITE_OHIF_URL }} \
+            --build-arg VITE_GUEST_USERNAME=${{ secrets.VITE_GUEST_USERNAME }} \
+            --build-arg VITE_GUEST_PASSWORD=${{ secrets.VITE_GUEST_PASSWORD }} \
+            -t frontend-image ./frontend
           docker tag frontend-image ${{ secrets.ECR_FRONTEND_URI }}:latest
           docker push ${{ secrets.ECR_FRONTEND_URI }}:latest
+
+      # 🖥️ Same as above — but for your frontend React app
