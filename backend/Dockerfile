@@ -15,7 +15,7 @@ COPY . .
 # RUN python manage.py collectstatic --noinput
 
 # Expose port
-EXPOSE 8000
+EXPOSE 80
 
 # Run the app with gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:80", "core.wsgi:application"]
