@@ -88,7 +88,7 @@ jobs:
       # "imageUri" is the full Docker image path in ECR (with :latest or any other tag)
 
       - name: Deploy frontend to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: frontend-imagedefinitions.json
           service: ${{ secrets.ECS_FRONTEND_SERVICE }}
