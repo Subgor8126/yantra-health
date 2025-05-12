@@ -90,7 +90,7 @@ const LPHero = () => {
         }}
       >
         {/* Abstract background elements */}
-        <Box 
+        {/* <Box 
           sx={{
             position: 'absolute',
             width: '500px',
@@ -100,8 +100,8 @@ const LPHero = () => {
             top: '-200px',
             right: '-100px',
           }}
-        />
-        <Box 
+        /> */}
+        {/* <Box 
           sx={{
             position: 'absolute',
             width: '300px',
@@ -111,7 +111,7 @@ const LPHero = () => {
             bottom: '-100px',
             left: '10%',
           }}
-        />
+        /> */}
 
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">

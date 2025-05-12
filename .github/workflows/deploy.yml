@@ -77,3 +77,29 @@ jobs:
           docker push ${{ secrets.ECR_FRONTEND_URI }}:latest
 
       # 🖥️ Same as above — but for your frontend React app
+
+      - name: Fill in imagedefinitions.json
+        run: |
+          echo '[{"name":"dicom-server-frontend","imageUri":"${{ secrets.ECR_FRONTEND_URI }}"}]' > frontend-imagedefinitions.json
+          echo '[{"name":"dicom-server-backend","imageUri":"${{ secrets.ECR_BACKEND_URI }}"}]' > backend-imagedefinitions.json
+
+      # This line creates a file named imagedefinitions.json on the fly.
+      # "name" must match the container name in your ECS task definition exactly (e.g., "frontend", "backend").
+      # "imageUri" is the full Docker image path in ECR (with :latest or any other tag)
+
+      - name: Deploy frontend to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: frontend-imagedefinitions.json
+          service: ${{ secrets.ECS_FRONTEND_SERVICE }}
+          cluster: ${{ secrets.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
+
+      - name: Deploy backend to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: backend-imagedefinitions.json
+          service: ${{ secrets.ECS_BACKEND_SERVICE }}
+          cluster: ${{ secrets.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
+
