@@ -23,27 +23,27 @@
       "secrets": [
         {
           "name": "AWS_ACCESS_KEY_ID",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:AWS_ACCESS_KEY_ID"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_ACCESS_KEY_ID"
         },
         {
           "name": "AWS_REGION",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:AWS_REGION"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_REGION"
         },
         {
           "name": "AWS_S3_REGION",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:AWS_S3_REGION"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_S3_REGION"
         },
         {
           "name": "AWS_SECRET_ACCESS_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:AWS_SECRET_ACCESS_KEY"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_SECRET_ACCESS_KEY"
         },
         {
           "name": "AWS_STORAGE_BUCKET_NAME",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:AWS_STORAGE_BUCKET_NAME"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_STORAGE_BUCKET_NAME"
         },
         {
           "name": "DICOM_DYNAMO_TABLE",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env-DWLwUh:SecretString:DICOM_DYNAMO_TABLE"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/DICOM_DYNAMO_TABLE"
         }
       ]
     }
