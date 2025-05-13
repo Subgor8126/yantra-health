@@ -36,6 +36,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React Local Dev
     "http://your-frontend-domain.com",  # Production Frontend
     "http://localhost:3000",  # OHIF Viewer
+    "https://yantrahealth.in"
 ]
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
