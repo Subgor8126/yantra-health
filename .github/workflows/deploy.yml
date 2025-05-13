@@ -82,7 +82,7 @@ jobs:
         id: render-frontend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ecs-task-defs/frontend-td.json
+          task-definition: ecs-task-definitions/frontend-td.json
           container-name: dicom-server-frontend
           image: ${{ secrets.ECR_FRONTEND_URI }}
 
@@ -112,7 +112,7 @@ jobs:
         id: render-backend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ecs-task-defs/backend-td.json
+          task-definition: ecs-task-definitions/backend-td.json
           container-name: dicom-server-backend
           image: ${{ secrets.ECR_BACKEND_URI }}
 
