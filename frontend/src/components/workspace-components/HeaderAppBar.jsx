@@ -5,7 +5,7 @@ import {
   Button, Menu, MenuItem, Avatar, Divider, 
   Dialog, DialogTitle, DialogContent, 
   Drawer, List, ListItem, ListItemIcon, ListItemText,
-  Tooltip
+  Tooltip, Stack
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
@@ -245,6 +245,7 @@ export default function EnhancedHeader() {
       onClose={handleMobileMenuClose}
     >
       {auth.isGuest ? (
+        <>
         <MenuItem onClick={auth.login}>
           <Button
             fullWidth
@@ -260,6 +261,22 @@ export default function EnhancedHeader() {
             Sign In
           </Button>
         </MenuItem>
+        <MenuItem onClick={auth.logout}>
+          <Button
+            variant="contained"
+            onClick={auth.logout}
+            sx={{
+              fontWeight: 'bold',
+              background: "rgba(235, 0, 0, 0.85)",
+              "&:hover": {
+                  background: "linear-gradient(270deg,rgba(196, 8, 8, 0.85), rgb(0, 0, 0))"
+              },
+            }}
+            >
+                Log Out
+          </Button>
+        </MenuItem>
+        </>
       ) : (
         <>
           <MenuItem>
@@ -322,19 +339,35 @@ export default function EnhancedHeader() {
           {/* Desktop actions */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
             {auth.isGuest ? (
-              <Button
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  onClick={auth.login}
+                  sx={{
+                    fontWeight: 'bold',
+                    background: "#fc3003",
+                    "&:hover": {
+                      background: "linear-gradient(270deg,rgb(230, 3, 3), rgb(0, 89, 255))"
+                    },
+                  }}
+                >
+                  Sign In
+                </Button>
+                
+                <Button
                 variant="contained"
-                onClick={auth.login}
+                onClick={auth.logout}
                 sx={{
                   fontWeight: 'bold',
-                  background: "#fc3003",
+                  background: "rgba(235, 0, 0, 0.85)",
                   "&:hover": {
-                    background: "linear-gradient(270deg,rgb(230, 3, 3), rgb(0, 89, 255))"
+                    background: "linear-gradient(270deg,rgba(196, 8, 8, 0.85), rgb(0, 0, 0))"
                   },
                 }}
               >
-                Sign In
+                Log Out
               </Button>
+            </Stack>
             ) : (
               <>
                 <UploadButton />
