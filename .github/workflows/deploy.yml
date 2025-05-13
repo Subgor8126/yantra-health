@@ -78,28 +78,55 @@ jobs:
 
       # 🖥️ Same as above — but for your frontend React app
 
-      - name: Fill in imagedefinitions.json
-        run: |
-          echo '[{"name":"dicom-server-frontend","imageUri":"${{ secrets.ECR_FRONTEND_URI }}"}]' > frontend-imagedefinitions.json
-          echo '[{"name":"dicom-server-backend","imageUri":"${{ secrets.ECR_BACKEND_URI }}"}]' > backend-imagedefinitions.json
-
-      # This line creates a file named imagedefinitions.json on the fly.
-      # "name" must match the container name in your ECS task definition exactly (e.g., "frontend", "backend").
-      # "imageUri" is the full Docker image path in ECR (with :latest or any other tag)
-
-      - name: Deploy frontend to ECS
+      - name: Render updated frontend task definition
+        id: render-frontend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: frontend-imagedefinitions.json
+          task-definition: ecs-task-defs/frontend-td.json
+          container-name: dicom-server-frontend
+          image: ${{ secrets.ECR_FRONTEND_URI }}
+
+      # What it does:
+      # Reads your frontend-td.json
+      # Finds the container named dicom-server-frontend
+      # Replaces "image": "PLACEHOLDER" with your actual image URI
+      # Outputs a new .task-definition.json (in runner workspace)
+
+      - name: Deploy frontend to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-frontend.outputs.task-definition }}
           service: ${{ secrets.ECS_FRONTEND_SERVICE }}
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: true
 
+      # What it does:
+      # Registers the rendered task definition as a new revision (e.g., v2)
+      # Updates the ECS service to use this new revision
+      # ECS performs a rolling update:
+      # Starts new task with new image
+      # Waits for health check pass
+      # Stops old task
+
+      - name: Render updated backend task definition
+        id: render-backend
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs-task-defs/backend-td.json
+          container-name: dicom-server-backend
+          image: ${{ secrets.ECR_BACKEND_URI }}
+
+      # Backend: Same exact process as for the frontend-td.json above
+      # Just with:
+      # ecs-task-defs/backend.json
+      # dicom-server-backend
+      # ECR_BACKEND_URI
+      # Service name for backend
+
       - name: Deploy backend to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: backend-imagedefinitions.json
+          task-definition: ${{ steps.render-backend.outputs.task-definition }}
           service: ${{ secrets.ECS_BACKEND_SERVICE }}
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: true
-
