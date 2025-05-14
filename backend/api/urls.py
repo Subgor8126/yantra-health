@@ -7,6 +7,7 @@ from .delete_utils import delete_data_by_file_key
 from .ohif_utils import generate_pre_signed_url_for_ohif
 from .ohif_utils import print_something
 from .ohif_utils import send_json_response_to_ohif
+from .stats import get_stats
 
 def api_only_root(request):
     return JsonResponse({"message": "Backend API is running."})
@@ -18,6 +19,7 @@ urlpatterns = [
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
     path("get-ohif-response", send_json_response_to_ohif, name="get-ohif-url"),
     path("print-something", print_something, name="print-something"),
+    path("stats", get_stats, name="stats"),
     path("", api_only_root)
 ]
 

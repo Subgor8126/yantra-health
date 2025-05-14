@@ -25,11 +25,14 @@ import {
   DevicesOther as DevicesIcon,
   MedicalServices as MedicalIcon
 } from '@mui/icons-material';
+import { useDispatch } from "react-redux";
+import { setSnackbar } from "../redux/slices/snackbarSlice"; // Redux action for snackbar
 
 // This component replaces your LPHero component
 const LPHero = () => {
   const theme = useTheme();
   const auth = useAuthCustom();
+  const dispatch = useDispatch();
   
   const handleSignIn = () => {
     auth.login();
@@ -37,6 +40,7 @@ const LPHero = () => {
 
   const handleGuestSignIn = () => {
     auth.loginAsGuest();
+    dispatch(setSnackbar({ open: true, message: "Logging In as Guest", severity: "info" }));
     console.log("Guest login initiated");
   }
   

@@ -75,11 +75,11 @@ export const useAuthCustom = () => {
   };
 
   const logout = async () => {
-    localStorage.removeItem("isGuest");
     setGuestUser(null);
     setGuestTokens(null);
     sessionStorage.clear();
     await signOut();
+    localStorage.clear();
     // oidc.signoutRedirect();
     window.location.href = '/';
   };
