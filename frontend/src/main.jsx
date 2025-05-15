@@ -7,7 +7,7 @@ import { store } from './redux/store.js';
 import { Provider } from 'react-redux';
 
 const cognitoAuthConfig = {
-  authority: `https://${import.meta.env.VITE_COGNITO_DOMAIN}`,
+  authority: import.meta.env.VITE_COGNITO_AUTHORITY,
   client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
   redirect_uri: import.meta.env.VITE_COGNITO_REDIRECT_URI,
   response_type: import.meta.env.VITE_COGNITO_RESPONSE_TYPE,
