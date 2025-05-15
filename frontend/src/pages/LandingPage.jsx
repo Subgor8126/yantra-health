@@ -23,7 +23,8 @@ import {
   Speed as SpeedIcon,
   Storage as StorageIcon,
   DevicesOther as DevicesIcon,
-  MedicalServices as MedicalIcon
+  MedicalServices as MedicalIcon,
+  AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
 import { useDispatch } from "react-redux";
 import { setSnackbar } from "../redux/slices/snackbarSlice"; // Redux action for snackbar
@@ -50,11 +51,11 @@ const LPHero = () => {
       title: "Cloud Storage",
       description: "Securely store your DICOM files in the cloud with unlimited scalability"
     },
-    {
-      icon: <SecurityIcon fontSize="large" />,
-      title: "HIPAA Compliant",
-      description: "Enterprise-grade security ensuring patient data remains protected"
-    },
+    // {
+    //   icon: <SecurityIcon fontSize="large" />,
+    //   title: "HIPAA Compliant",
+    //   description: "Enterprise-grade security ensuring patient data remains protected"
+    // },
     {
       icon: <SpeedIcon fontSize="large" />,
       title: "Fast Access",
@@ -67,18 +68,18 @@ const LPHero = () => {
     }
   ];
   
-  const testimonials = [
-    {
-      name: "Dr. Sarah Johnson",
-      role: "Radiologist",
-      comment: "This cloud DICOM solution has transformed our workflow. We can now access patient studies from anywhere, saving us valuable time."
-    },
-    {
-      name: "Memorial Hospital",
-      role: "Radiology Department",
-      comment: "The security features and ease of use make this platform indispensable for our growing imaging needs."
-    }
-  ];
+  // const testimonials = [
+  //   {
+  //     name: "Dr. Sarah Johnson",
+  //     role: "Radiologist",
+  //     comment: "This cloud DICOM solution has transformed our workflow. We can now access patient studies from anywhere, saving us valuable time."
+  //   },
+  //   {
+  //     name: "Memorial Hospital",
+  //     role: "Radiology Department",
+  //     comment: "The security features and ease of use make this platform indispensable for our growing imaging needs."
+  //   }
+  // ];
 
   return (
     <Box sx={{ overflow: 'hidden' }}>
@@ -249,7 +250,7 @@ const LPHero = () => {
 
         <Grid container spacing={4}>
           {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid item xs={12} sm={6} md={4} key={index}>
               <Card 
                 elevation={1} 
                 sx={{ 
@@ -299,11 +300,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <CloudUploadIcon fontSize="large" />
+                  <AccountCircleIcon fontSize="large" />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>1. Upload</Typography>
+                <Typography variant="h6" gutterBottom>1. Authenticate</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Upload your DICOM files securely to our cloud platform
+                  Sign Up or Log In to your account
                 </Typography>
               </Box>
             </Grid>
@@ -317,11 +318,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <StorageIcon fontSize="large" />
+                  <CloudUploadIcon fontSize="large" />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>2. Store</Typography>
+                <Typography variant="h6" gutterBottom>2. Upload</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Your data is encrypted and stored in our HIPAA-compliant cloud
+                  Upload your DICOM files to our secure cloud platform
                 </Typography>
               </Box>
             </Grid>
@@ -347,7 +348,7 @@ const LPHero = () => {
         </Container>
       </Box>
 
-      {/* Testimonials */}
+      {/* Testimonials
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom>
           Trusted by Healthcare Professionals
@@ -385,7 +386,7 @@ const LPHero = () => {
             </Grid>
           ))}
         </Grid>
-      </Container>
+      </Container> */}
 
       {/* CTA Section */}
       <Box sx={{ 
@@ -397,9 +398,9 @@ const LPHero = () => {
           <Typography variant="h4" gutterBottom>
             Ready to get started?
           </Typography>
-          <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
+          {/* <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
             Join healthcare professionals worldwide who trust our cloud DICOM server
-          </Typography>
+          </Typography> */}
           <Button 
             variant="contained" 
             color="primary" 
@@ -433,13 +434,10 @@ const LPHero = () => {
                 Contact
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                support@clouddicom.example.com
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                +1 (555) 123-4567
+                gorwadkar@outlook.com
               </Typography>
             </Grid>
-            <Grid item xs={12} md={4}>
+            {/* <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Legal
               </Typography>
@@ -449,7 +447,7 @@ const LPHero = () => {
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
                 Terms of Service
               </Typography>
-            </Grid>
+            </Grid> */}
           </Grid>
           <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
