@@ -30,13 +30,16 @@ SECRET_KEY = "django-insecure-=^!q0v3(+)h5wyqwcez@vzv5nre1*pb=@&mi%^4%rqe1_)b_5u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "dicomserveralb-1668809663.us-east-1.elb.amazonaws.com",
+    "localhost",
+    "yantrahealth.in",
+    "127.0.0.1"
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React Local Dev
-    "http://your-frontend-domain.com",  # Production Frontend
-    "http://localhost:3000",  # OHIF Viewer
-    "https://yantrahealth.in"
+    "https://yantrahealth.in",
 ]
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")

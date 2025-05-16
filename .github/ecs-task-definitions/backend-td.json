@@ -49,6 +49,7 @@
     }
   ],
   "executionRoleArn": "arn:aws:iam::975050380826:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::975050380826:role/ECSExecTaskRole",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
