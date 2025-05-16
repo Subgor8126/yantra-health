@@ -15,6 +15,7 @@ import hashlib
 from decimal import Decimal
 from .ddb_utils import get_dynamodb_resource
 from .s3_utils import get_s3_client
+import traceback
 
 def get_dicom_value(dicom_data, attribute, default="Unknown"):
     """Safely fetches a DICOM attribute as a string."""
@@ -262,7 +263,12 @@ def upload_dicom(request):
 
             existing_sops = prev.get("SOPInstanceUIDList", [])
             existing_series = prev.get("SeriesInstanceUIDList", [])
-            existing_size = Decimal(str(prev.get("TotalStudySizeBytes", 0)))
+            size_raw = prev.get("TotalStudySizeBytes", 0)
+            try:
+                existing_size = Decimal(str(size_raw))
+            except Exception:
+                print("Warning: Failed to convert TotalStudySizeBytes to Decimal:", size_raw)
+                existing_size = Decimal("0")
 
             merged_sops = list(set(existing_sops + sop_uid_list))
             merged_series = list(set(existing_series + list(series_uid_set)))
@@ -302,7 +308,17 @@ def upload_dicom(request):
         return JsonResponse({"message": "Study uploaded successfully"})
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        # Log full traceback to container logs
+        print("Upload failed due to unexpected error:")
+        traceback.print_exc()
+
+        # Prevent long or unserializable error messages from crashing JsonResponse
+        safe_error = str(e)
+        if not isinstance(safe_error, str) or len(safe_error) > 500:
+            safe_error = "Unexpected server error occurred."
+
+        return JsonResponse({"error": safe_error}, status=500)
+
 
 
 # @csrf_exempt

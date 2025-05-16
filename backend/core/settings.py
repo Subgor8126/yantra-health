@@ -34,7 +34,9 @@ ALLOWED_HOSTS = [
     "dicomserveralb-1668809663.us-east-1.elb.amazonaws.com",
     "localhost",
     "yantrahealth.in",
-    "127.0.0.1"
+    "127.0.0.1",
+    ".compute.internal",  # AWS internal domains
+    "172.31.0.0/16",       # AWS default VPC CIDR (entire subnet)
 ]
 
 CORS_ALLOWED_ORIGINS = [
