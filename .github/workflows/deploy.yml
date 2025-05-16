@@ -72,6 +72,7 @@ jobs:
             --build-arg VITE_OHIF_URL=${{ secrets.VITE_OHIF_URL }} \
             --build-arg VITE_GUEST_USERNAME=${{ secrets.VITE_GUEST_USERNAME }} \
             --build-arg VITE_GUEST_PASSWORD=${{ secrets.VITE_GUEST_PASSWORD }} \
+            --build-arg VITE_COGNITO_AUTHORITY=${{ secrets.VITE_COGNITO_AUTHORITY }} \
             -t frontend-image ./frontend
           docker tag frontend-image ${{ secrets.ECR_FRONTEND_URI }}:latest
           docker push ${{ secrets.ECR_FRONTEND_URI }}:latest
