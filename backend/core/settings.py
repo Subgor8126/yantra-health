@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import socket
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -38,6 +39,14 @@ ALLOWED_HOSTS = [
     ".compute.internal",  # AWS internal domains
     "172.31.0.0/16",       # AWS default VPC CIDR (entire subnet)
 ]
+
+# Add current container’s private IP to ALLOWED_HOSTS
+try:
+    hostname = socket.gethostname()
+    container_ip = socket.gethostbyname(hostname)
+    ALLOWED_HOSTS.append(container_ip)
+except Exception as e:
+    pass  # Log if needed, but don't break startup
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React Local Dev
