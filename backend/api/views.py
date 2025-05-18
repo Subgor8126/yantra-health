@@ -16,6 +16,7 @@ from decimal import Decimal
 from .ddb_utils import get_dynamodb_resource
 from .s3_utils import get_s3_client
 import traceback
+import pprint
 
 def get_dicom_value(dicom_data, attribute, default="Unknown"):
     """Safely fetches a DICOM attribute as a string."""
@@ -247,6 +248,7 @@ def upload_dicom(request):
             }
 
             final_instance_metadata = numToDecimal(instance_metadata)
+            pprint(final_instance_metadata)
             table.put_item(Item=final_instance_metadata)
 
         study_s3_key = f"{user_id}/{patient_id}/{study_instance_uid}/"
@@ -303,6 +305,7 @@ def upload_dicom(request):
 
 
         final_study_metadata = numToDecimal(study_metadata)
+        pprint(final_instance_metadata)
         table.put_item(Item=final_study_metadata)
 
         return JsonResponse({"message": "Study uploaded successfully"})

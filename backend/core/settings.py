@@ -45,6 +45,7 @@ try:
     hostname = socket.gethostname()
     container_ip = socket.gethostbyname(hostname)
     ALLOWED_HOSTS.append(container_ip)
+    print(ALLOWED_HOSTS)
 except Exception as e:
     pass  # Log if needed, but don't break startup
 
