@@ -248,7 +248,7 @@ def upload_dicom(request):
             }
 
             final_instance_metadata = numToDecimal(instance_metadata)
-            pprint(final_instance_metadata)
+            pprint.pprint(final_instance_metadata)
             table.put_item(Item=final_instance_metadata)
 
         study_s3_key = f"{user_id}/{patient_id}/{study_instance_uid}/"
@@ -305,7 +305,7 @@ def upload_dicom(request):
 
 
         final_study_metadata = numToDecimal(study_metadata)
-        pprint(final_instance_metadata)
+        pprint.pprint(final_instance_metadata)
         table.put_item(Item=final_study_metadata)
 
         return JsonResponse({"message": "Study uploaded successfully"})
