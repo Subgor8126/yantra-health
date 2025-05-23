@@ -138,44 +138,60 @@ const LPHero = () => {
         py: 1.5
       }}
     >
-      <Box
+        <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          py: { xs: 1, sm: 2 },
+          px: { xs: 2, sm: 4 },
         }}
       >
+        {/* Logo + Text */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <img
-            src="/public/favicon-32x32.png"
+            src="/favicon-32x32.png"
             alt="Yantra Health Logo"
             style={{
-              height: 32,
-              width: 32,
+              height: 28,
+              width: 28,
               marginRight: 10,
-              borderRadius: 4
+              borderRadius: 4,
             }}
           />
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
               fontWeight: 'bold',
+              fontSize: { xs: 0, sm: '1.25rem' },
               background: 'linear-gradient(135deg, #FF1B6B 0%, #FF6B35 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              WebkitTextFillColor: 'transparent',
+              display: { xs: 'none', sm: 'inline' },
             }}
           >
             Yantra Health
           </Typography>
         </Box>
-        <Stack direction="row" spacing={2}>
+
+        {/* Buttons */}
+        <Stack
+          direction={{ xs: 'row', sm: 'row' }}
+          spacing={1}
+          sx={{
+            '& button': {
+              fontSize: { xs: '0.7rem', sm: '0.875rem' },
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
+            },
+          }}
+        >
           {signInButton}
           {tryAsGuestButton}
         </Stack>
       </Box>
     </Box>
-
 
       {/* Hero Section */}
       <Box 
