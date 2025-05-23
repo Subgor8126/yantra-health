@@ -27,9 +27,8 @@ import {
   AccountCircle as AccountCircleIcon,
 } from '@mui/icons-material';
 import { useDispatch } from "react-redux";
-import { setSnackbar } from "../redux/slices/snackbarSlice"; // Redux action for snackbar
+import { setSnackbar } from "../redux/slices/snackbarSlice";
 
-// This component replaces your LPHero component
 const LPHero = () => {
   const theme = useTheme();
   const auth = useAuthCustom();
@@ -67,6 +66,42 @@ const LPHero = () => {
       description: "Access your DICOM server from any device or operating system"
     }
   ];
+
+  const signInButton = (
+    <Button 
+      variant="contained" 
+      color="secondary" 
+      size="large"
+      onClick={handleSignIn}
+      sx={{ 
+        borderRadius: 2,
+        px: 4,
+        py: 1.5
+      }}
+    >
+      Sign In
+    </Button>
+  );
+
+  const tryAsGuestButton = (
+    <Button 
+      variant="outlined" 
+      onClick={handleGuestSignIn}
+      sx={{ 
+        borderRadius: 2,
+        borderColor: 'white',
+        color: 'white',
+        px: 4,
+        py: 1.5,
+        '&:hover': {
+          borderColor: 'white',
+          backgroundColor: 'rgba(255,255,255,0.1)'
+        }
+      }}
+    >
+      Try as Guest
+    </Button>
+    );
   
   // const testimonials = [
   //   {
@@ -83,6 +118,65 @@ const LPHero = () => {
 
   return (
     <Box sx={{ overflow: 'hidden' }}>
+
+      {/* Navigation */}
+      <Box
+      sx={{
+        position: 'fixed',
+        top: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '1200px',
+        zIndex: 1000,
+        bgcolor: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(20px)',
+        borderRadius: '16px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+        px: 4,
+        py: 1.5
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/public/favicon-32x32.png"
+            alt="Yantra Health Logo"
+            style={{
+              height: 32,
+              width: 32,
+              marginRight: 10,
+              borderRadius: 4
+            }}
+          />
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #FF1B6B 0%, #FF6B35 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}
+          >
+            Yantra Health
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={2}>
+          {signInButton}
+          {tryAsGuestButton}
+        </Stack>
+      </Box>
+    </Box>
+
+
       {/* Hero Section */}
       <Box 
         sx={{
@@ -91,32 +185,10 @@ const LPHero = () => {
           pt: 8,
           pb: 12,
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          pt: 14
         }}
       >
-        {/* Abstract background elements */}
-        {/* <Box 
-          sx={{
-            position: 'absolute',
-            width: '500px',
-            height: '500px',
-            borderRadius: '50%',
-            background: 'rgba(248, 4, 57, 0.92)',
-            top: '-200px',
-            right: '-100px',
-          }}
-        /> */}
-        {/* <Box 
-          sx={{
-            position: 'absolute',
-            width: '300px',
-            height: '300px',
-            borderRadius: '50%',
-            background: 'rgba(122, 6, 87, 0.7)',
-            bottom: '-100px',
-            left: '10%',
-          }}
-        /> */}
 
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
@@ -131,36 +203,8 @@ const LPHero = () => {
                 Store, view, and share DICOM files with ease. Our platform provides healthcare professionals with instant access to medical images from anywhere, on any device.
               </Typography> */}
               <Stack direction="row" spacing={2}>
-                <Button 
-                  variant="contained" 
-                  color="secondary" 
-                  size="large"
-                  onClick={handleSignIn}
-                  sx={{ 
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleGuestSignIn}
-                  sx={{ 
-                    borderRadius: 2,
-                    borderColor: 'white',
-                    color: 'white',
-                    px: 4,
-                    py: 1.5,
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255,255,255,0.1)'
-                    }
-                  }}
-                >
-                  Try as Guest
-                </Button>
+                {/* {signInButton}
+                {tryAsGuestButton} */}
               </Stack>
             </Grid>
             <Grid item xs={12} md={5}>
@@ -527,98 +571,3 @@ function LandingPage() {
 }
 
 export default LandingPage;
-
-
-// Original UI
-// import React from "react";
-// import { useAuthCustom } from "react-oidc-context";
-// import { useEffect, useState } from "react";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import { Box, Typography, Button, Container, InputLabel, Link, Stack, TextField } from "@mui/material";
-// import visuallyHidden from '@mui/utils/visuallyHidden';
-// import { styled } from '@mui/material/styles';
-// import StyledBox from "../assets/lp/StyledBox";
-// import LPHero from "../components/landing-page-components/LPHero";
-
-// function LandingPage() {
-
-//   const auth = useAuthCustom();
-//   const navigate = useNavigate();
-//   const location = useLocation();
-
-//   useEffect(() => {
-//     // Step 1: Check if the user is already authenticated
-//     if (auth.isAuthenticated && auth.user?.access_token) {
-//       console.log("Got them goddamn tokens");
-
-//       const tokens = { 
-//         access_token: auth.user?.access_token,
-//         refresh_token: auth.user?.refresh_token,
-//         id_token: auth.user?.id_token
-//       };
-
-//       // localStorage.setItem("access_token", tokens.access_token);
-//       // localStorage.setItem("id_token", tokens.id_token);
-//       // localStorage.setItem("refresh_token", tokens.refresh_token);
-
-//       console.log(`Authentication successful:
-//         access token: ${tokens.access_token}
-//         id token: ${tokens.id_token}
-//         refresh token: ${tokens.refresh_token}`);
-
-//       // Redirect to /app if on the landing page
-//       // if (window.location.pathname === "/") {
-//       //   navigate("/app/workspace", { replace: true });
-//       // }
-//       return;
-//     }
-//     console.log("--------------------------------------------------")
-//     console.log(location);
-//     console.log("Here's the location from landing page")
-//     console.log(location.search)
-//     console.log("What's this?")
-//     console.log("--------------------------------------------------")
-
-//     // Step 2: If user is NOT authenticated but there is an auth code in the URL, process it
-//     // const searchParams = new URLSearchParams(location.search);
-//     // const code = searchParams.get("code");
-//     // const state = searchParams.get("state");
-
-//     // if (code && state) {
-//     //   console.log("Detected auth code + state, processing signinCallback...");
-
-//     //   auth.signinCallback().catch(error => {
-//     //     console.error("Error during signinCallback:", error);
-//     //   });
-//     // }
-//   }, [auth.isAuthenticated, location.search, navigate]);
-
-//   if (auth.error) {
-//     console.log("_____________error_________________")
-//     console.log(auth.error);
-//     console.log("_____________error_________________")
-//     return <Box>Encountering error... {auth.error.message}</Box>;
-//   }
-
-//   if(auth.isLoading){
-//     return (
-//       <Box>
-//         Authenticating, Please Wait.............
-//       </Box>
-//     )
-//   }
-
-//   // Box is div with extra styling, mostly cause of the sx prop. Typography is for text, variant prop for type of txt
-//   // like h1 or h2, and p: 1 means a padding of 8 pixels because Material UI uses units like 1 = 8px. Just watch this
-//   // video, it's quick and awesome:- https://youtu.be/FB-sKY63AWo?si=6WVrqg8Tz2thoqNV
-//   return (
-    
-//     <LPHero/>
-
-//     // <Container>
-//     //   <LPHero/>
-//     // </Container>
-//   );
-// }
-
-// export default LandingPage;
