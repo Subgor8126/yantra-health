@@ -38,9 +38,9 @@ const theme = createTheme({
           fontWeight: 600,
           padding: "10px 20px",
           textTransform: "none",
-          background: "#960527",
+          background: "linear-gradient(135deg, #960527 0%, #960527 100%)", // same color start-end
           color: "#ffffff",
-          // transition: "0.4s ease-in",
+          transition: "background 0.3s ease-in-out",
           "&:hover": {
             background: "linear-gradient(135deg, #7c041f 30%, #b71c4b 100%)",
           },
