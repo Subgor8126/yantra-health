@@ -39,7 +39,7 @@ export default function EnhancedHeader() {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   // Upload handlers
-  const handleDicomUpload = async (filesArray) => {
+  const handleDicomUpload = async (filesArray, isStudy) => {
     if (!filesArray || filesArray.length === 0) {
       dispatch(setSnackbar({ open: true, message: "Please select a file or folder!", severity: "error" }));
       return;
@@ -48,7 +48,14 @@ export default function EnhancedHeader() {
     try {
       const token = auth.tokens?.access_token;
       if (!token) throw new Error("User is not authenticated");
-      setUploading(true);
+
+      if (isStudy) {
+        console.log("Uploading study...");
+        setUploadingStudy(true);
+      }
+      else{
+        setUploading(true);
+      }
   
       const formData = new FormData();
       for (const file of filesArray) {
@@ -127,21 +134,22 @@ export default function EnhancedHeader() {
         startIcon={<CloudUploadIcon />}
         sx={{
           "@keyframes gradientShift": {
-            "0%": { backgroundPosition: "0% 50%" },
-            "100%": { backgroundPosition: "100% 50%" }
+            "0%": { backgroundPositionX: "100%" },
+            "100%": { backgroundPositionX: "0%" }
           },
           background: isUploading
-            ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92))"
+            ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92), #fc3003)" // seamless loop by repeating start color
             : "#fc3003",
-          backgroundSize: isUploading ? "300% 300%" : "auto",
-          animation: isUploading ? "gradientShift 1s infinite linear" : "none",
+          backgroundSize: "300% 100%",
+          backgroundRepeat: "repeat",
+          animation: isUploading ? "gradientShift 1s linear infinite" : "none",
           willChange: isUploading ? "background-position" : "auto",
           transition: "background 0.2s ease-in-out",
           "&:hover": {
-            background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))",
+            background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
           },
           ml: 1
-        }}
+        }}        
       >
         {isUploading ? "Uploading..." : isStudy ? "Upload Study" : "Upload Files"}
         <input
@@ -152,7 +160,7 @@ export default function EnhancedHeader() {
           onChange={(event) => {
             const files = Array.from(event.target.files);
             if (files.length > 0) {
-              handleDicomUpload(files);
+              handleDicomUpload(files, isStudy);
               setIsUploading(true);
               event.target.value = null; // Reset input
             }
@@ -168,9 +176,6 @@ export default function EnhancedHeader() {
       <Box sx={{ px: 2, pb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           Yantra Health
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          DICOM Management
         </Typography>
       </Box>
       <Divider />

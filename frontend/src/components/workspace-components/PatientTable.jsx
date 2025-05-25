@@ -24,7 +24,8 @@ import {
   Divider,
   Menu,
   MenuItem,
-  ListItemIcon
+  ListItemIcon,
+  Skeleton
 } from '@mui/material';
 import { 
   Delete as DeleteIcon,
@@ -143,6 +144,7 @@ function PatientTable() {
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [activeFilters, setActiveFilters] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [deletingRowKey, setDeletingRowKey] = useState(null);
   
   // Redux state
   const rows = useSelector((state) => state.dicomData.dicomData);
@@ -167,6 +169,7 @@ function PatientTable() {
 
   const handleConfirmDelete = async () => {
     setDeleteDialogOpen(false);
+    setDeletingRowKey(selectedFileKey);  // Trigger skeleton state
     if (selectedFileKey) {
       try {
         const deleteResponse = await handleDicomDelete(userId, selectedFileKey);
@@ -181,6 +184,7 @@ function PatientTable() {
         dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
       }
     }
+    setDeletingRowKey(null)
   };
 
   const handleCancelDelete = () => {
@@ -330,7 +334,7 @@ function PatientTable() {
           borderBottom: '1px solid rgba(224, 224, 224, 1)' 
         }}
       >
-        <Typography variant="h5" fontWeight="bold">
+        <Typography variant="h5" fontWeight="bold" visibility={{ xs: 'hidden', sm: 'visible' }} color="text.primary">
           Patient Studies
         </Typography>
         
@@ -462,7 +466,6 @@ function PatientTable() {
             <Table stickyHeader aria-label="patient studies table">
               <TableHead>
                 <TableRow>
-                  
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -498,7 +501,32 @@ function PatientTable() {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                     return (
-                      <TableRow
+                      (row.FileKey === deletingRowKey) ? (
+                          <TableRow key={row.FileKey}>
+                            <TableCell colSpan={columns.length}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                                <Skeleton 
+                                  variant="rounded" 
+                                  height={40} 
+                                  animation="wave"
+                                  sx={{ flex: 1, bgcolor: 'rgba(250, 3, 3, 0.27)', borderRadius: 10 }}
+                                />
+                                <Typography sx={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  left: '50%',
+                                  transform: 'translate(-50%, -50%)',
+                                  color: 'rgb(255, 255, 255)',
+                                  fontWeight: 600,
+                                }}>
+                                  Deleting Study...
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                      ) : (
+                        
+                        <TableRow
                         hover
                         role="checkbox"
                         tabIndex={-1}
@@ -593,7 +621,7 @@ function PatientTable() {
                             </TableCell>
                           );
                         })}
-                      </TableRow>
+                      </TableRow>)
                     );
                   })}
               </TableBody>
