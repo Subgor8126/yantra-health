@@ -130,9 +130,9 @@ const LPHero = () => {
         maxWidth: '1200px',
         zIndex: 1000,
         bgcolor: 'rgba(0, 0, 0, 0.6)',
-        backdropFilter: 'blur(20px)',
+        backdropFilter: 'blur(10px)',
         borderRadius: '16px',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        border: '1px solid rgb(255, 255, 255)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
         px: 4,
         py: 1.5
@@ -156,7 +156,7 @@ const LPHero = () => {
               height: 28,
               width: 28,
               marginRight: 10,
-              borderRadius: 4,
+              borderRadius: 4
             }}
           />
           <Typography
@@ -168,7 +168,7 @@ const LPHero = () => {
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              display: { xs: 'none', sm: 'inline' },
+              display: { xs: 'none', sm: 'inline' }
             }}
           >
             Yantra Health
