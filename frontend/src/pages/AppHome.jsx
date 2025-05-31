@@ -74,7 +74,7 @@ function AppHome() {
         </Grid>
         
         {/* Stats Card */}
-        {!auth.isGuest && (
+        {!auth.isGuest ? (
         <Grid item xs={12} md={6}>
           <Paper 
             elevation={2}
@@ -118,6 +118,24 @@ function AppHome() {
             ) : (
               <Typography>Loading stats...</Typography>
             )}
+          </Paper>
+        </Grid>
+        ) : (
+          <Grid item xs={12} md={6}>
+          <Paper 
+            elevation={2}
+            sx={{ 
+              p: 3, 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              background: 'linear-gradient(135deg,rgb(22, 97, 172) 0%,rgb(0, 10, 104) 100%)',
+              color: 'white'
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 2 }}>Log In as a User and Upload Files to view stats</Typography>
+
           </Paper>
         </Grid>
         )}
