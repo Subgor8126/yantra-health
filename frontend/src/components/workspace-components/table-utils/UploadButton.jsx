@@ -4,7 +4,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const UploadButton = ({ 
   isStudy = false, 
-  uploading = false, 
+  uploading = false,
   onUpload,
   sx = {}
 }) => {
