@@ -79,7 +79,7 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          base: HEAD~1  # 🔧 FIX: Explicitly compare against the previous commit
+          # base: HEAD~1  # 🔧 FIX: Explicitly compare against the previous commit
           # This ensures we're comparing the current commit against exactly one commit back,
           # rather than relying on the action's automatic detection which might be inconsistent.
           filters: |
