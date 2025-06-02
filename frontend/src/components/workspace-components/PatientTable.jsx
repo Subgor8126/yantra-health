@@ -52,7 +52,6 @@ import DeleteDialog from './table-utils/DeleteDialog';
 import { formatName, formatDate } from './table-utils';
 // auth imports
 import { useAuthCustom } from '../../hooks/useAuthCustom';
-import { UploadButton } from './table-utils';
 
 const isAuthGuest = localStorage.getItem('isGuest') === 'true';
 
@@ -682,10 +681,6 @@ function PatientTable() {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Upload DICOM files to view and analyze your studies.
               </Typography>
-              <UploadButton
-                uploading={uploading}
-                onUpload={handleDicomUpload}
-              />
             </CardContent>
           </Card>
         </Box>

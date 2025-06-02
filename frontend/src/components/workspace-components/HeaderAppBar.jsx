@@ -332,10 +332,6 @@ export default function HeaderAppBar() {
               >
                 Log Out
               </Button>
-              <UploadButton 
-                uploading={uploading}
-                onUpload={handleDicomUpload}
-              />
             </Stack>
             ) : (
               <>
