@@ -22,8 +22,9 @@ import { triggerRefresh } from '../../redux/slices/dicomDataSlice';
 import { setSnackbar } from '../../redux/slices/snackbarSlice';
 import ProfilePage from './ProfilePage';
 import { useNavigate } from 'react-router-dom';
+import { UploadButton } from './table-utils';
 
-export default function EnhancedHeader() {
+export default function HeaderAppBar() {
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
@@ -120,54 +121,6 @@ export default function EnhancedHeader() {
     auth.logout(); 
     dispatch(setSnackbar({ open: true, message: "Logged out successfully!", severity: "success" }));
     handleMenuClose();
-  };
-
-  // Components for upload buttons
-  const UploadButton = ({ isStudy = false }) => {
-    const isUploading = isStudy ? uploadingStudy : uploading;
-    const setIsUploading = isStudy ? setUploadingStudy : setUploading;
-    
-    return (
-      <Button
-        component="label"
-        variant="contained"
-        startIcon={<CloudUploadIcon />}
-        sx={{
-          "@keyframes gradientShift": {
-            "0%": { backgroundPositionX: "100%" },
-            "100%": { backgroundPositionX: "0%" }
-          },
-          background: isUploading
-            ? "linear-gradient(270deg, #fc3003, rgb(0, 89, 255), rgb(15, 1, 92), #fc3003)" // seamless loop by repeating start color
-            : "#fc3003",
-          backgroundSize: "300% 100%",
-          backgroundRepeat: "repeat",
-          animation: isUploading ? "gradientShift 1s linear infinite" : "none",
-          willChange: isUploading ? "background-position" : "auto",
-          transition: "background 0.2s ease-in-out",
-          "&:hover": {
-            background: "linear-gradient(270deg, #fc3003, rgb(0, 89, 255))"
-          },
-          ml: 1
-        }}        
-      >
-        {isUploading ? "Uploading..." : isStudy ? "Upload Study" : "Upload Files"}
-        <input
-          type="file"
-          {...(isStudy ? { webkitdirectory: "true", directory: "true" } : {})}
-          multiple
-          hidden
-          onChange={(event) => {
-            const files = Array.from(event.target.files);
-            if (files.length > 0) {
-              handleDicomUpload(files, isStudy);
-              setIsUploading(true);
-              event.target.value = null; // Reset input
-            }
-          }}
-        />
-      </Button>
-    );
   };
 
   // Side drawer content
@@ -285,10 +238,17 @@ export default function EnhancedHeader() {
       ) : (
         <>
           <MenuItem>
-            <UploadButton />
+          <UploadButton 
+            uploading={uploading}
+            onUpload={handleDicomUpload}
+          />
           </MenuItem>
           <MenuItem>
-            <UploadButton isStudy={true} />
+            <UploadButton 
+              isStudy={true} 
+              uploading={uploading}
+              onUpload={handleDicomUpload}
+            />
           </MenuItem>
           <MenuItem onClick={handleProfileOpen}>
             <ListItemIcon><PersonIcon /></ListItemIcon>
@@ -372,11 +332,22 @@ export default function EnhancedHeader() {
               >
                 Log Out
               </Button>
+              <UploadButton 
+                uploading={uploading}
+                onUpload={handleDicomUpload}
+              />
             </Stack>
             ) : (
               <>
-                <UploadButton />
-                <UploadButton isStudy={true} />
+                <UploadButton 
+                  uploading={uploading}
+                  onUpload={handleDicomUpload}
+                />
+                <UploadButton 
+                  isStudy={true}
+                  uploading={uploading}
+                  onUpload={handleDicomUpload}
+                />
                 <Tooltip title="Account">
                   <IconButton
                     edge="end"

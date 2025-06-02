@@ -289,7 +289,7 @@ const LPHero = () => {
                       color="primary"
                       fullWidth
                     >
-                      View Details
+                      Open in OHIF Viewer
                     </Button>
                   </Box>
                 </Paper>
