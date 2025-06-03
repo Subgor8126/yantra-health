@@ -5,7 +5,7 @@ from datetime import datetime
 from collections import defaultdict
 from decimal import Decimal
 from django.http import JsonResponse
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 
 # Initialize DynamoDB
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
@@ -14,9 +14,9 @@ table = dynamodb.Table(os.getenv('DICOM_DYNAMO_TABLE'))
 @csrf_exempt
 def get_stats(request):
     user_id = request.GET.get("userId")
-    print(f"UserID HERERERERER: {user_id}")
+    print(f"UserId HERERERERER: {user_id}")
     response = table.query(
-        KeyConditionExpression=Key('UserID').eq(user_id)
+        KeyConditionExpression=Key('UserId').eq(user_id)
     )
     items = response.get('Items', [])
 

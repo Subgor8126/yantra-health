@@ -11,8 +11,6 @@ def get_cognito_public_keys():
     print("In the get_cognito_public_keys function")
     try:
         response = requests.get(url, timeout=5)  # Add timeout
-        # response.raise_for_status()  # Raise error if request fails
-        # print(response.json())
         return response.json().get("keys", [])
     except requests.RequestException as e:
         print(f"Failed to fetch Cognito keys: {e}")
@@ -23,9 +21,6 @@ def cognito_token_verification(token):
     try:
         print("In the cognito_token_verification function try block")
         keys = get_cognito_public_keys()
-        # print(f"Keys: {keys}")
-        
-        # Decode JWT without verifying the signature
         header = jwt.get_unverified_header(token)
 
         key = next((k for k in keys if k["kid"] == header["kid"]), None)

@@ -1,11 +1,10 @@
-import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import boto3
 import os
-from .ddb_utils import get_dynamodb_resource
-from .s3_utils import get_s3_client
+from api.services import get_dynamodb_resource
+from api.services import get_s3_client
 
 S3_BUCKET = os.getenv("AWS_STORAGE_BUCKET_NAME", "yantra-healthcare-imaging")
 S3_REGION = os.getenv("AWS_S3_REGION", "us-east-1")
@@ -13,14 +12,14 @@ S3_REGION = os.getenv("AWS_S3_REGION", "us-east-1")
 @csrf_exempt
 def delete_data_by_file_key(request):
     file_key = request.GET.get("fileKey")
-    user_id = request.GET.get("userId")  # Accept UserID from request
+    user_id = request.GET.get("userId")  # Accept UserId from request
 
     try:
         dynamodb_resource = get_dynamodb_resource()
         dicom_data_table = dynamodb_resource.Table("dicomFileMetadataTable")
         # Step 1: Delete the study record
         response = dicom_data_table.delete_item(
-            Key={'UserID': user_id, 'FileKey': file_key},
+            Key={'UserId': user_id, 'FileKey': file_key},
             ReturnValues="ALL_OLD"
         )
         deleted_item = response.get("Attributes", {})
@@ -32,7 +31,7 @@ def delete_data_by_file_key(request):
 
         # 1. Query all items for this user
         items = dicom_data_table.query(
-            KeyConditionExpression=boto3.dynamodb.conditions.Key("UserID").eq(user_id)
+            KeyConditionExpression=boto3.dynamodb.conditions.Key("UserId").eq(user_id)
         )["Items"]
 
         # 2. Delete every item whose FileKey starts with the study key
@@ -40,23 +39,11 @@ def delete_data_by_file_key(request):
         for item in items:
             if item["FileKey"].startswith(file_key):  # match any file under that study prefix
                 dicom_data_table.delete_item(
-                    Key={"UserID": item["UserID"], "FileKey": item["FileKey"]}
+                    Key={"UserId": item["UserId"], "FileKey": item["FileKey"]}
                 )
                 deleted_count += 1
 
-
-        # s3_response = delete_file_from_s3(file_key)
         deleted_s3_keys = delete_s3_prefix(file_key)
-        # status_code = s3_response.get('HTTPStatusCode', 500)
-        # print("Le code du status")
-        # print(status_code)
-
-        # if 200 <= status_code <= 299:
-        #     return JsonResponse({
-        #         "DeleteText": f"Dicom File Deleted Successfully.\nDeleted File Details\nFile Name: {deleted_file_name}\nPatient Name: {deleted_patient_name}"
-        #     }, status=200)
-
-        # return JsonResponse({"DeleteText": "File probably deleted"}, status=200)
 
         if deleted_s3_keys:  # if list is non-empty
             return JsonResponse({
