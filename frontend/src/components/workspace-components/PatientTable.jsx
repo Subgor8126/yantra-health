@@ -49,51 +49,30 @@ import { setSnackbar } from '../../redux/slices/snackbarSlice';
 import { handleDicomDataFetching } from './table-utils';
 import { handleDicomDelete } from './table-utils';
 import DeleteDialog from './table-utils/DeleteDialog';
-import { formatName, formatDate } from './table-utils';
+import { formatName, formatDate, formatAge } from './table-utils';
 // auth imports
 import { useAuthCustom } from '../../hooks/useAuthCustom';
 
 const isAuthGuest = localStorage.getItem('isGuest') === 'true';
 
+// Defines the columns for the patient table
 const baseColumns = [
-  { id: 'PatientID', label: 'Patient ID', minWidth: 50, align: 'left', sortable: true },
-  { id: 'PatientName', label: 'Patient Name', minWidth: 50, align: 'left', sortable: true },
-  { id: 'PatientSex', label: 'Sex', minWidth: 30, align: 'center', sortable: true },
+  { id: '00100020', label: 'Patient ID', minWidth: 50, align: 'left', sortable: true },
+  { id: '00100010', label: 'Patient Name', minWidth: 50, align: 'left', sortable: true },
+  { id: '00100040', label: 'Patient Sex', minWidth: 30, align: 'center', sortable: true },
+  { id: '00101010', label: 'Patient Age', minWidth: 30, align: 'center', sortable: true },
+  { id: '00102160', label: 'Patient Ethnicity', minWidth: 30, align: 'center', sortable: true },
   {
-    id: 'NumberOfInstances',
-    label: 'Images',
-    minWidth: 30,
-    align: 'center',
-    format: (value) => value.toLocaleString('en-US'),
-    sortable: true
-  },
-  {
-    id: 'Modality',
-    label: 'Modality',
-    minWidth: 40,
-    align: 'center',
-    format: (value) => value.toLocaleString('en-US'),
-    sortable: true
-  },
-  {
-    id: 'AccessionNumber',
-    label: 'Accession #',
-    minWidth: 40,
-    align: 'center',
-    format: (value) => value.toLocaleString('en-US'),
-    sortable: true
-  },
-  {
-    id: 'BodyPartExamined',
-    label: 'Body Part',
+    id: '00180015',
+    label: 'Latest Study',
     minWidth: 40,
     align: 'left',
     format: (value) => value.toLocaleString('en-US'),
     sortable: true
   },
   {
-    id: 'StudyDate',
-    label: 'Study Date',
+    id: '00080020',
+    label: 'Latest Study Date',
     minWidth: 40,
     align: 'left',
     format: (value) => value.toLocaleString('en-US'),
@@ -160,6 +139,14 @@ function PatientTable() {
     setPage(0);
   };
 
+  // Refresh button handler
+  const handleRefresh = () => {
+    dispatch(triggerRefresh());
+    dispatch(setSnackbar({ open: true, message: "Refreshing DICOM data...", severity: "info" }));
+  };
+
+  // Delete button handler
+  // This function opens the delete confirmation dialog and sets the selected file key
   const handleOpenDeleteDialog = (event, fileKey) => {
     console.log("FileKey to be deleted: ", fileKey);
     event.stopPropagation(); // to stop the click from being interpreted as a click on the entire row
@@ -167,6 +154,8 @@ function PatientTable() {
     setDeleteDialogOpen(true);
   };
 
+  // Confirm delete handler
+  // This function handles the deletion of a DICOM file if the user confirms the deletion in the dialog
   const handleConfirmDelete = async () => {
     setDeleteDialogOpen(false);
     setDeletingRowKey(selectedFileKey);  // Trigger skeleton state
@@ -187,6 +176,8 @@ function PatientTable() {
     setDeletingRowKey(null)
   };
 
+  // Cancel delete handler
+  // This function closes the delete confirmation dialog and resets the selected file key
   const handleCancelDelete = () => {
     setDeleteDialogOpen(false);
     setSelectedFileKey(null);
@@ -229,10 +220,11 @@ function PatientTable() {
   // View study handler
   const handleViewStudy = (row) => {
     dispatch(setPatient(row));
-    navigate(`/app/workspace/${row.PatientID}`);
+    navigate(`/app/workspace/patient/${row['00100020']}?fileKey=${row.FileKey.slice(0,-1)}`); // Remove trailing slash
   };
 
-  // Data fetching
+  // Data fetching instantly after the component mounts
+  // and whenever the dicomDataRefresh or userId changes
   useEffect(() => {
     if (!userId) return;
   
@@ -241,13 +233,17 @@ function PatientTable() {
   
       const fetchedData = await handleDicomDataFetching(userId);
   
+      // Check if data exists
       if (fetchedData.length === 0) {
         setDataExists(false);
       } else {
         setDataExists(true);
       }
+
+      // Dispatch the fetched data to Redux
       dispatch(setDicomData(fetchedData));
   
+      // Reset pagination and filters
       setLoading(false);
     };
   
@@ -265,7 +261,7 @@ function PatientTable() {
       
       // Apply active filters
       const matchesFilters = activeFilters.length === 0 || 
-        activeFilters.some(filter => row.Modality === filter);
+        activeFilters.some(filter => row['00080060'] === filter);
       
       return matchesSearch && matchesFilters;
     });
@@ -302,14 +298,8 @@ function PatientTable() {
 
   // Get unique modalities for filter menu
   const uniqueModalities = React.useMemo(() => {
-    return [...new Set(rows.map(row => row.Modality))].filter(Boolean);
+    return [...new Set(rows.map(row => row['00080060']))].filter(Boolean);
   }, [rows]);
-
-  // Refresh button handler
-  const handleRefresh = () => {
-    dispatch(triggerRefresh());
-    dispatch(setSnackbar({ open: true, message: "Refreshing DICOM data...", severity: "info" }));
-  };
 
   // Check if there are search/filter/sort active
   const hasActiveFiltersOrSearch = searchTerm !== '' || activeFilters.length > 0;
@@ -335,7 +325,7 @@ function PatientTable() {
         }}
       >
         <Typography variant="h5" fontWeight="bold" visibility={{ xs: 'hidden', sm: 'visible' }} color="text.primary">
-          Patient Studies
+          Patients
         </Typography>
         
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -352,7 +342,7 @@ function PatientTable() {
           >
             <InputBase
               sx={{ ml: 1, flex: 1}}
-              placeholder="Search patient studies..."
+              placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -582,11 +572,13 @@ function PatientTable() {
                           let chipColor;
 
                           // Format specific columns
-                          if (column.id === "PatientName") {
+                          if (column.id === "00100010") {
                             displayValue = formatName(value);
-                          } else if (column.id === "StudyDate") {
+                          } else if (column.id === "00080020") {
                             displayValue = formatDate(value);
-                          } else if (column.id === "PatientSex") {
+                          } else if (column.id === "00101010"){
+                            displayValue = value ? formatAge(value) : '—';
+                          } else if (column.id === "00100040") {
                             return (
                               <TableCell key={column.id} align={column.align}>
                                 <Tooltip title={value === 'M' ? 'Male' : value === 'F' ? 'Female' : 'Other/Unknown'}>
@@ -600,7 +592,7 @@ function PatientTable() {
                                 </Tooltip>
                               </TableCell>
                             );
-                          } else if (column.id === "Modality") {
+                          } else if (column.id === "00080060") {
                             chipColor = getModalityColor(value);
                             return (
                               <TableCell key={column.id} align={column.align}>
@@ -690,307 +682,3 @@ function PatientTable() {
 }
 
 export default PatientTable;
-
-// import React from 'react';
-// import { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// // mui imports
-// import { Box, TableRow, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, IconButton, Typography, LinearProgress } from '@mui/material';
-// import DeleteIcon from '@mui/icons-material/Delete';
-// // redux imports
-// import { useDispatch, useSelector } from 'react-redux';
-// import { setPatient } from '../../redux/slices/patientDataSlice';
-// import { setDicomData } from '../../redux/slices/dicomDataSlice';
-// import { triggerRefresh } from '../../redux/slices/dicomDataSlice';
-// // util imports
-// import { handleDicomDataFetching } from './table-utils';
-// import { handleDicomDelete } from './table-utils';
-// import DeleteDialog from './table-utils/DeleteDialog';
-// import { formatName, formatDate } from './table-utils';
-// // auth imports
-// import { useAuthCustom } from '../../hooks/useAuthCustom';
-// import { setSnackbar } from '../../redux/slices/snackbarSlice';
-
-// const isAuthGuest = localStorage.getItem('isGuest') === 'true';
-
-// const baseColumns = [
-//   { id: 'PatientID', label: 'Patient\u00a0ID', minWidth: 50, align: 'center' },
-//   { id: 'PatientName', label: 'Patient\u00a0Name', minWidth: 50, align: 'center' },
-//   { id: 'PatientSex', label: 'Patient\u00a0Sex', minWidth: 50, align: 'center' },
-//   {
-//     id: 'NumberOfInstances',
-//     label: 'Number\u00a0of\u00a0Instances',
-//     minWidth: 100,
-//     align: 'center',
-//     format: (value) => value.toLocaleString('en-US'),
-//   },
-//   {
-//     id: 'Modality',
-//     label: 'Modality',
-//     minWidth: 100,
-//     align: 'center',
-//     format: (value) => value.toLocaleString('en-US'),
-//   },
-//   {
-//     id: 'AccessionNumber',
-//     label: 'Accession\u00a0Number',
-//     minWidth: 100,
-//     align: 'center',
-//     format: (value) => value.toLocaleString('en-US'),
-//   },
-//   {
-//     id: 'BodyPartExamined',
-//     label: 'Body\u00a0Part\u00a0Examined',
-//     minWidth: 100,
-//     align: 'center',
-//     format: (value) => value.toLocaleString('en-US'),
-//   },
-//   {
-//     id: 'StudyDate',
-//     label: 'Study\u00a0Date',
-//     minWidth: 100,
-//     align: 'center',
-//     format: (value) => value.toLocaleString('en-US'),
-//   }
-// ];
-
-// const columns = isAuthGuest
-//   ? baseColumns
-//   : [...baseColumns, {
-//       id: 'DeleteStudyButton',
-//       label: 'Delete\u00a0Study',
-//       minWidth: 100,
-//       align: 'center',
-//     }];
-
-// function PatientTable() {
-//   const auth = useAuthCustom();
-//   const userId = auth.userId
-//   const navigate = useNavigate();
-//   const [page, setPage] = useState(0);
-//   const [rowsPerPage, setRowsPerPage] = useState(10);
-//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-//   const [selectedFileKey, setSelectedFileKey] = useState(null);
-//   const [dataExists, setDataExists] = useState(false);
-//   const [loading, setLoading] = useState(true);
-//   const dispatch = useDispatch();
-//   const rows = useSelector((state) => state.dicomData.dicomData);
-//   const dicomDataRefresh = useSelector((state) => state.dicomData.refreshTable);
-//   // const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
-//   console.log("Here are the rowsVVVV")
-//   console.log(rows)
-//   console.log("User ID ist hier VVVV")
-//   console.log(userId)
-
-//   console.log("Here are the rows VVVVVVV")
-//   console.log(rows)
-
-//   const handleChangePage = (event, newPage) => {
-//     setPage(newPage);
-//   };
-
-//   const handleChangeRowsPerPage = (event) => {
-//     setRowsPerPage(+event.target.value);
-//     setPage(0);
-//   }; 
-
-//   const handleOpenDeleteDialog = (event, fileKey) => {
-//     event.stopPropagation(); // to stop the click on the delete button from being interpreted as a click on the entire row
-//     setSelectedFileKey(fileKey);
-//     setDeleteDialogOpen(true);
-//   };
-
-//   const handleConfirmDelete = async () => {
-//     setDeleteDialogOpen(false);
-//     if (selectedFileKey) {
-//       console.log("Deleting file:", selectedFileKey);
-//       // Call the actual delete function here
-//       // await handleDicomDelete(selectedFileKey);
-//       try {
-//         const deleteResponse = await handleDicomDelete(userId, selectedFileKey);
-
-//         console.log("HERE IS THE DELETE RESPONSE")
-    
-//         if (deleteResponse?.DeleteText) {
-//           console.log(deleteResponse.DeleteText);
-//           dispatch(setSnackbar({ open: true, message: deleteResponse.DeleteText, severity: "success" }));
-//           dispatch(triggerRefresh());
-//         } else if (deleteResponse?.message) {
-//           dispatch(setSnackbar({ open: true, message: deleteResponse.message, severity: "error" }));
-//         }
-//       } catch (error) {
-//         dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
-//       }
-//     }
-//   };
-
-//   const handleCancelDelete = () => {
-//     setDeleteDialogOpen(false);
-//     setSelectedFileKey(null);
-//     dispatch(setSnackbar({ open: true, message: "Delete operation cancelled", severity: "success" }))
-//   };
-
-//   useEffect(() => {
-//       if (!userId) return;
-    
-//       const fetchData = async () => {
-//         setLoading(true); // <-- start loading
-    
-//         const fetchedData = await handleDicomDataFetching(userId);
-    
-//         if (fetchedData.length === 0) {
-//           setDataExists(false);
-//         } else {
-//           setDataExists(true);
-//         }
-//         dispatch(setDicomData(fetchedData));
-    
-//         setLoading(false); // <-- loading finished
-//       };
-    
-//       fetchData();
-//     }, [dicomDataRefresh, userId]);
-  
-
-//   return (
-//     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-//       {loading ? (
-//       <Box
-//         sx={{
-//           height: '81vh',
-//           display: 'flex',
-//           flexDirection: 'column',
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//           textAlign: 'center',
-//           px: 2,
-//           gap: 2,
-//         }}
-//       >
-//         <LinearProgress sx={{ width: '300px', mb: 2 }} color="primary" />
-//         <Typography variant="h6" color="text.primary">
-//           Please Wait, Fetching DICOM Data...
-//         </Typography>
-//       </Box>
-//     ) : dataExists ? (
-//       <>
-//       <TableContainer sx={{ maxHeight: '81vh', height: '81vh' }}>
-//         <Table stickyHeader aria-label="sticky table">
-//           <TableHead>
-//             <TableRow>
-//               {columns.map((column) => (
-//                 <TableCell
-//                 key={column.id}
-//                 align={column.align || "left"}
-//                 sx={{
-//                   width: `${100 / columns.length}%`, // Distributes columns equally
-//                   fontWeight: "bold",
-//                 }}
-//                 >
-//                   {column.label}
-//                 </TableCell>
-//               ))}
-//             </TableRow>
-//           </TableHead>
-//           <TableBody>
-//             {rows
-//               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-//               .map((row) => {
-//                 return (
-//                   <TableRow
-//                     hover
-//                     role="checkbox"
-//                     tabIndex={-1}
-//                     key={row.FileKey}
-//                     onClick={() => {
-//                       dispatch(setPatient(row)); // Store patient data in Redux
-//                       navigate(`/app/workspace/${row.PatientID}`);
-//                     }}
-//                     sx={{
-//                       transition: "background 0.4s ease-in-out", // Smooth transition
-//                       background: "transparent", // Default background
-//                       "&:hover": {
-//                         background: "linear-gradient(90deg, rgba(150,5,39,0.2) 0%, rgba(215,42,94,0.3) 100%)",
-//                         cursor: "pointer", // Change cursor on hover
-//                       },
-//                     }}
-//                   >
-//                     {columns.map((column) => {
-//                       const value = row[column.id];
-//                       // console.log(row)
-//                       return (
-//                         <TableCell key={column.id} align={column.align}>
-//                           {(() => {
-//                               if (column.id === "DeleteStudyButton") {
-//                                 return (
-//                                   <IconButton onClick={(event) => handleOpenDeleteDialog(event, row.FileKey)} color="error">
-//                                     <DeleteIcon />
-//                                   </IconButton>
-//                                 );
-//                               }
-
-//                               let displayValue = value;
-
-//                               if (column.id === "PatientName") {
-//                                 displayValue = formatName(value);
-//                               } else if (column.format && typeof value === "number") {
-//                                 displayValue = column.format(value);
-//                               } else if(column.id === "StudyDate"){
-//                                 displayValue = formatDate(value);
-//                               }
-
-//                               return displayValue;
-//                             })()}
-
-//                           {/* The extra parentheses in your JSX {(() => { ... })()} are due to an Immediately Invoked Function Expression (IIFE) */}
-//                           {/* (() => { ... }) → This is an arrow function with a block body. */}
-//                           {/* (() => { ... })() → The final () at the end immediately invokes the function. */}
-//                         </TableCell>
-//                       );
-//                     })}
-//                   </TableRow>
-//                 );
-//               })}
-//           </TableBody>
-//         </Table>
-//       </TableContainer>
-//       <TablePagination
-//         rowsPerPageOptions={[10, 25, 100]}
-//         component="div"
-//         count={rows.length}
-//         rowsPerPage={rowsPerPage}
-//         page={page}
-//         onPageChange={handleChangePage}
-//         onRowsPerPageChange={handleChangeRowsPerPage}
-//       />
-//       <DeleteDialog 
-//         open={deleteDialogOpen} 
-//         onConfirm={handleConfirmDelete} 
-//         onCancel={handleCancelDelete} 
-//       />
-      
-//       </>
-//       ) : (
-//         <Box
-//           sx={{
-//             height: '81vh',
-//             display: 'flex',
-//             flexDirection: 'column',
-//             alignItems: 'center',
-//             justifyContent: 'center',
-//             textAlign: 'center',
-//             px: 2,
-//             gap: 2,
-//           }}
-//         >
-//           <Typography variant="h6" color="text.primary">
-//             No DICOM Data Available. Please upload to view studies.
-//           </Typography>
-//         </Box>
-//       )}
-//     </Paper>
-//   );
-// }
-
-// export default PatientTable;

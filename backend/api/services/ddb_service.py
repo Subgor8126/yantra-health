@@ -15,20 +15,28 @@ def get_dynamodb_resource():
     )
 
 @csrf_exempt
-def get_study_data_by_uid(request):
+def get_dicom_metadata(request):
     try:
         user_id = request.GET.get("userId") # Get UserId from the URL query parameters
-        record_type = request.GET.get("recordType")  # e.g., "study" or "instance"
+        record_type = request.GET.get("recordType")  # e.g., "patient, "series", "study" or "instance"
+        file_key = request.GET.get("fileKey", "")  # Optional, used to filter results
 
         if not user_id or not record_type:
             return JsonResponse({"error": "Missing required parameters: userId and/or recordType"}, status=400)
         
         dynamodb_resource = get_dynamodb_resource()
         dicom_data_table = dynamodb_resource.Table("dicomFileMetadataTable")
-        response = dicom_data_table.query(
-            KeyConditionExpression=Key('UserId').eq(user_id),
-            FilterExpression=Attr('DataType').eq(record_type)
-        )
+
+        if file_key == "":
+            response = dicom_data_table.query(
+                KeyConditionExpression=Key('UserId').eq(user_id),
+                FilterExpression=Attr('DataType').eq(record_type)
+            )
+        else:
+            response = dicom_data_table.query(
+                KeyConditionExpression=Key('UserId').eq(user_id) & Key("FileKey").begins_with(file_key),
+                FilterExpression=Attr('DataType').eq(record_type)
+            )
 
         items = response['Items']
         return JsonResponse(items, safe=False)

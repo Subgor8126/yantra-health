@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from api.services import generate_and_return_presigned_url
 from api.services import cognito_token_verification
 from decimal import Decimal
 from datetime import datetime
@@ -46,6 +45,7 @@ DICOM_TAGS = {
     "StudyInstanceUID": "0020000D",
     "AccessionNumber": "00080050",
     "StudyTime": "00080030",
+    "ReferringPhysicianName": "00080090"
 
     # Series Information
     "SeriesInstanceUID": "0020000E",
@@ -135,6 +135,7 @@ def validate_dicom_file(file_obj):
         file_obj.seek(current_pos)
         return False, f"DICOM validation error: {str(e)}"
 
+# Validate whether all files have the same StudyInstanceUID, SeriesInstanceUID, and PatientID
 def validate_dicom_consistency(files):
     if not files:
         return False, "No files provided"
@@ -145,9 +146,10 @@ def validate_dicom_consistency(files):
     first_ds = pydicom.dcmread(first_file, force=True)
     study_uid = getattr(first_ds, "StudyInstanceUID", None)
     patient_id = getattr(first_ds, "PatientID", None)
+    series_uid = getattr(first_ds, "SeriesInstanceUID", None)
     
-    if not study_uid or not patient_id:
-        return False, "First file missing StudyInstanceUID or PatientID"
+    if not study_uid or not patient_id or not series_uid:
+        return False, "First file missing StudyInstanceUID, SeriesInstanceUID, or PatientID"
     
     # Check all other files
     inconsistencies = []
@@ -160,6 +162,9 @@ def validate_dicom_consistency(files):
             inconsistencies.append(f"File {i+1}: Different StudyInstanceUID")
         
         if getattr(ds, "PatientID", None) != patient_id:
+            inconsistencies.append(f"File {i+1}: Different PatientID")
+
+        if getattr(ds, "SeriesInstanceUID", None) != series_uid:
             inconsistencies.append(f"File {i+1}: Different PatientID")
     
     # Reset file positions
@@ -189,6 +194,11 @@ def upload_dicom(request):
         if not files:
             return JsonResponse({"error": "No DICOM files uploaded"}, status=400)
         
+        # Validate whether all files have the same StudyInstanceUID, SeriesInstanceUID, and PatientID
+        validation, validation_response = validate_dicom_consistency(files)
+        if not validation:
+            return JsonResponse({"error": f"{validation_response}"}, status=400)
+        
         s3 = get_s3_client()
         bucket = os.environ.get("AWS_STORAGE_BUCKET_NAME")
         dynamodb = get_dynamodb_resource()
@@ -203,7 +213,7 @@ def upload_dicom(request):
         first_instance_dicom_data = pydicom.dcmread(first_instance_from_study, force=True)
         files[0].seek(0)
 
-        # Base metadata with attribute names (will be converted to tags later)
+        # Base metadata with attribute names for the "study" and "instance" data types (will be converted to tags later)
         base_metadata = {
             "UserId": user_id,
             "UploadTimestamp": timestamp,
@@ -234,9 +244,6 @@ def upload_dicom(request):
             "XRayTubeCurrent": get_dicom_value(first_instance_dicom_data, "XRayTubeCurrent"),
             "ConvolutionKernel": get_dicom_value(first_instance_dicom_data, "ConvolutionKernel")
         }
-
-        print("here's the base metadata")
-        print(base_metadata)
 
         for f in files:
             dicom_ds = pydicom.dcmread(f, force=True)
@@ -325,6 +332,64 @@ def upload_dicom(request):
             pprint.pprint(final_instance_metadata)
             table.put_item(Item=final_instance_metadata)
 
+        # --- Prepare series-level metadata ---
+        series_s3_key = f"{user_id}/{patient_id}/{study_instance_uid}/{series_instance_uid}/"
+
+        # Try fetching existing series record
+        existing_series = table.query(
+            KeyConditionExpression=boto3.dynamodb.conditions.Key("UserId").eq(user_id),
+            FilterExpression=boto3.dynamodb.conditions.Attr("DataType").eq("series") & boto3.dynamodb.conditions.Attr(DICOM_TAGS["SeriesInstanceUID"]).eq(series_instance_uid)
+        )
+
+        # # Merge previous data if available
+        if existing_series.get("Items"):
+            prev = existing_series["Items"][0]
+
+            existing_sops = prev.get("SOPInstanceUIDList", [])
+            size_raw = prev.get("TotalStudySizeBytes", 0)
+            try:
+                existing_size = Decimal(str(size_raw))
+            except Exception:
+                print("Warning: Failed to convert TotalStudySizeBytes to Decimal:", size_raw)
+                existing_size = Decimal("0")
+
+            merged_sops = list(set(existing_sops + sop_uid_list))
+            merged_total_size = existing_size + total_size_bytes
+        else:
+            merged_sops = sop_uid_list
+            merged_total_size = total_size_bytes
+
+        # Prepare final merged study metadata (with attribute names)
+        series_metadata = {
+            **base_metadata,
+            "FileKey": series_s3_key,
+
+            "StudyName": get_dicom_value(first_instance_dicom_data, "StudyDescription"),
+            "StudyUIDHash": hashlib.sha1(study_instance_uid.encode()).hexdigest(),
+
+            # Series Information from first file (snapshot)
+            "SeriesInstanceUID": get_dicom_value(first_instance_dicom_data, "SeriesInstanceUID"),
+            "SeriesNumber": get_dicom_value(first_instance_dicom_data, "SeriesNumber", "1"),
+            "SeriesDescription": get_dicom_value(first_instance_dicom_data, "SeriesDescription"),
+            "Modality": get_dicom_value(first_instance_dicom_data, "Modality", "OT"),
+            "BodyPartExamined": get_dicom_value(first_instance_dicom_data, "BodyPartExamined"),
+
+            # Cumulative metadata
+            "NumberOfInstances": len(merged_sops),
+            "SOPInstanceUIDList": merged_sops,
+            "TotalStudySizeBytes": merged_total_size,
+            "DataType": "series"
+        }
+
+        # Convert attribute names to DICOM tags
+        tagged_series_metadata = convert_to_dicom_tags(series_metadata)
+        final_series_metadata = numToDecimal(tagged_series_metadata)
+        
+        print("Final series metadata with DICOM tags:")
+        pprint.pprint(final_series_metadata)
+        table.put_item(Item=final_series_metadata)
+
+        # --- Prepare study-level metadata ---
         study_s3_key = f"{user_id}/{patient_id}/{study_instance_uid}/"
 
         # Try fetching existing study record
@@ -361,6 +426,7 @@ def upload_dicom(request):
 
             "StudyName": get_dicom_value(first_instance_dicom_data, "StudyDescription"),
             "StudyUIDHash": hashlib.sha1(study_instance_uid.encode()).hexdigest(),
+            "ReferringPhysicianName": get_dicom_value(first_instance_dicom_data, "ReferringPhysicianName"),
 
             # Series Information from first file (snapshot)
             "SeriesInstanceUID": get_dicom_value(first_instance_dicom_data, "SeriesInstanceUID"),
@@ -385,7 +451,49 @@ def upload_dicom(request):
         pprint.pprint(final_study_metadata)
         table.put_item(Item=final_study_metadata)
 
+        # --- Prepare patient-level metadata ---
+        patient_metadata = {
+            "UserId": user_id,
+            "FileKey": '/'.join(study_s3_key.split('/')[:2])+'/',  # Base path for patient files
+            "PatientID": get_dicom_value(first_instance_dicom_data, "PatientID"),
+            "PatientName": get_dicom_value(first_instance_dicom_data, "PatientName"),
+            "PatientSex": get_dicom_value(first_instance_dicom_data, "PatientSex"),
+            "PatientAge": get_dicom_value(first_instance_dicom_data, "PatientAge"),
+            "PatientWeight": get_dicom_value(first_instance_dicom_data, "PatientWeight"),
+            "UploadTimestamp": timestamp,
+            "StudyInstanceUIDList": [study_instance_uid],
+            "DataType": "patient",
+        }
 
+        # Optional: Add birthdate, region, contact info, etc.
+        extra_patient_keys = [
+            "PatientBirthDate", "EthnicGroup", "PatientSize", "PatientComments",
+            "PatientAddress", "CountryOfResidence", "RegionOfResidence",
+            "PatientTelephoneNumbers", "ResponsiblePerson", "ResponsiblePersonRole"
+        ]
+        for key in extra_patient_keys:
+            patient_metadata[key] = get_dicom_value(first_instance_dicom_data, key)
+
+        # Convert to DICOM tags
+        tagged_patient_metadata = convert_to_dicom_tags(patient_metadata)
+        final_patient_metadata = numToDecimal(tagged_patient_metadata)
+
+        # Optional: merge if already exists
+        existing_patient = table.query(
+            KeyConditionExpression=boto3.dynamodb.conditions.Key("UserId").eq(user_id),
+            FilterExpression=boto3.dynamodb.conditions.Attr("DataType").eq("patient") &
+                            boto3.dynamodb.conditions.Attr(DICOM_TAGS["PatientID"]).eq(patient_metadata["PatientID"])
+        )
+        
+        if existing_patient.get("Items"):
+            prev = existing_patient["Items"][0]
+            study_list = list(set(prev.get("StudyInstanceUIDList", []) + [study_instance_uid]))
+            final_patient_metadata["StudyInstanceUIDList"] = study_list
+
+        # Insert or update
+        print("Final patient metadata with DICOM tags:")
+        pprint.pprint(final_patient_metadata)
+        table.put_item(Item=final_patient_metadata)
 
         return JsonResponse({"message": "Study uploaded successfully"})
 

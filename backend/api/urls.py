@@ -1,7 +1,7 @@
 from django.urls import path
 from django.http import JsonResponse
 from api.views import upload_dicom
-from api.services import get_study_data_by_uid
+from api.services import get_dicom_metadata
 from api.views import delete_data_by_file_key
 from api.views import print_something
 from api.services import get_stats
@@ -11,7 +11,7 @@ def api_only_root(request):
 
 urlpatterns = [
     path("upload-dicom", upload_dicom, name="upload-dicom"),
-    path("get-study-data-by-uid", get_study_data_by_uid, name="get-study-data-by-uid"),
+    path("get-dicom-metadata", get_dicom_metadata, name="get-dicom-metadata"),
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
     path("print-something", print_something, name="print-something"),
     path("stats", get_stats, name="stats"),

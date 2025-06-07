@@ -20,6 +20,8 @@ def get_stats(request):
     )
     items = response.get('Items', [])
 
+    print(items)
+
     total_instances = 0
     total_studies = 0
     total_study_size_bytes = Decimal(0)

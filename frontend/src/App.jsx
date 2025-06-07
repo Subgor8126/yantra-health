@@ -43,7 +43,7 @@ function App() {
           <Route element={<ProtectedRoutes auth={auth} />}>
             <Route path="app" element={<AppHome />}/>
             <Route path="app/workspace" element={<Workspace />} />
-            <Route path="app/workspace/:patient_id" element={<PatientDetails />} />
+            <Route path="app/workspace/patient/:patient_id" element={<PatientDetails />} />
           </Route>
         </Routes>
       </Router>

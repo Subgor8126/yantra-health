@@ -52,11 +52,11 @@ def delete_data_by_file_key(request):
                 "DeletedInstanceCount": deleted_count,
                 "Patient": deleted_patient_name
             }, status=200)
-        else:
-            return JsonResponse({
-                "DeleteText": "No S3 files found for deletion.",
-                "DeletedInstanceCount": deleted_count
-            }, status=404)
+
+        return JsonResponse({
+            "DeleteText": "No S3 files found for deletion.",
+            "DeletedInstanceCount": deleted_count
+        }, status=404)
     
     except Exception as e:
         print(f"Failed to delete DICOM data: {str(e)}")

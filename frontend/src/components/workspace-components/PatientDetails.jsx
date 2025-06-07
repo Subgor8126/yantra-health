@@ -1,5 +1,5 @@
-import React from 'react';
-import { Navigate, useParams } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom';
 import { formatName, formatDate, formatAge } from './table-utils';
@@ -31,58 +31,63 @@ import {
 import { XrayIcon } from './details_page_utils/XrayIcon';
 import { useAuthCustom } from '../../hooks/useAuthCustom';
 
+const DICOM_TAGS = {
+  PatientID: "00100020",
+  PatientName: "00100010",
+  PatientSex: "00100040",
+  PatientAge: "00101010",
+  Modality: "00080060",
+  AccessionNumber: "00080050",
+  BodyPartExamined: "00180015",
+  StudyID: "00200010",
+  SeriesNumber: "00200011",
+  StudyDate: "00080020",
+  StudyDescription: "00081030",
+  ReferringPhysicianName: "00080090",
+  BodyPartExamined: "00180015"
+};
+
 const PatientDetails = () => {
-  const { patientId } = useParams();
+  const { patient_id } = useParams();
+  const [searchParams] = useSearchParams();
+  const fileKey = searchParams.get('fileKey');
+
   const patientData = useSelector((state) => state.patient.patient);
   const navigate = useNavigate();
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const auth = useAuthCustom();
   const userId = auth.userId
 
+  let studyData = {};
+
+  useEffect(() => {
+    const fetchStudyData = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-dicom-metadata?userId=${userId}&recordType=study&fileKey=${fileKey}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        studyData = await response.json();
+        console.log("Fetched study data:", studyData);
+
+      } catch (error) {
+        console.error("Error fetching study data:", error);
+      }
+    };
+
+    fetchStudyData();
+    }, [patient_id, API_BASE_URL, userId]);
+
   const handleViewInOHIF = async () => {
-    // Placeholder for OHIF viewer navigation
-    console.log("Opening file in OHIF viewer:", patientData?.FileKey);
-    // This would eventually route to your OHIF viewer with the appropriate parameters
-    // window.open(`/ohif-viewer?fileKey=${encodeURIComponent(patientData.FileKey)}`, '_blank');
-
-    // const response = await fetch(`${API_BASE_URL}/api/get-ohif-response?fileKey=${patientData?.FileKey}`, {
-    //   method: 'GET'
-    // });
-    // console.log("response ist hier")
-
-    // if (!response.ok) {
-    //   throw new Error(`HTTP error! Status: ${response.status}`);
-    // }
-
-    // console.log("sparks")
-
-    // console.log(response['pre_signed_url'])
-
-    // const { pre_signed_url } = await response.json(); // Parse JSON first!
-
-    //  const JsonResponseUrl = encodeURIComponent(`${API_BASE_URL}/api/get-ohif-response?fileKey=${patientData?.FileKey}&userId=${userId}`);
-    // const JsonResponseUrl = encodeURIComponent('https://yantra-healthcare-imaging.s3.amazonaws.com/04989458-2081-70ba-7740-7ec9c9f34b66/8155012288/2-1.dcm?AWSAccessKeyId=AKIA6GBMICYNHJQZOPAV&Signature=uIwfvI3qM2p0mAL%2BDiNHQwJ85kc%3D&Expires=1742540396');
-
-     // Construct OHIF Viewer URL using `wadouri:` to indicate raw DICOM file
      const ohifViewerUrl = `${import.meta.env.VITE_OHIF_URL}/viewer?StudyInstanceUIDs=${patientData?.StudyInstanceUID}`;
-
      console.log("OHIF Viewer URL:", ohifViewerUrl);
-
      // Open OHIF Viewer in a new tab
      window.open(ohifViewerUrl, "_blank");
-  };
-
-  // const handleGoBack = () => {
-  //   const navigate = useNavigate();
-  //   // Placeholder for navigation
-  //   console.log("Navigating back to patient list");
-  //   // history.goBack() or use your router's navigation
-  // };
-
-  const handleFilePathClick = () => {
-    // Placeholder for file path click handler
-    console.log("File path clicked:", patientData?.FileKey);
-    // This would eventually do something with the file path
   };
 
   // If no patient data is found, show a simple message
@@ -98,7 +103,7 @@ const PatientDetails = () => {
           </Typography>
         </Box>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6">Patient ID: {patientId}</Typography>
+          <Typography variant="h6">Patient ID: {patient_id}</Typography>
           <Typography color="error">No patient data found.</Typography>
         </Paper>
       </Box>
@@ -139,14 +144,9 @@ const PatientDetails = () => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ mr: 1 }} />
             <Typography variant="h6">
-              {formatName(patientData.PatientName)}
+              {formatName(patientData[DICOM_TAGS.PatientName]) || 'Unknown Patient'}
             </Typography>
           </Box>
-          <Chip 
-            label={patientData.Modality || 'Unknown'} 
-            color="secondary" 
-            size="small"
-          />
         </Box>
 
         <Grid container spacing={3} sx={{ p: 3 }}>
@@ -167,7 +167,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.PatientID || patientId || 'Not Available'}
+                      {patientData[DICOM_TAGS.PatientID] || patient_id || 'Not Available'}
                     </Typography>
                   </Grid>
                   
@@ -179,9 +179,9 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.PatientSex === 'M' ? 'Male' : 
-                       patientData.PatientSex === 'F' ? 'Female' : 
-                       patientData.PatientSex || 'Not Available'}
+                      {patientData[DICOM_TAGS.PatientSex] === 'M' ? 'Male' : 
+                       patientData[DICOM_TAGS.PatientSex] === 'F' ? 'Female' : 
+                       patientData[DICOM_TAGS.PatientSex] || 'Not Available'}
                     </Typography>
                   </Grid>
 
@@ -193,7 +193,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {formatAge(patientData.PatientAge)}
+                      {formatAge(patientData[DICOM_TAGS.PatientAge])}
                     </Typography>
                   </Grid>
                   
@@ -205,7 +205,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.AccessionNumber}
+                      {patientData[DICOM_TAGS.AccessionNumber]}
                     </Typography>
                   </Grid>
 
@@ -217,7 +217,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {formatName(patientData.ReferringPhysicianName)}
+                      {formatName(patientData[DICOM_TAGS.ReferringPhysicianName])}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -242,7 +242,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.StudyDescription || 'Not Available'}
+                      {patientData[DICOM_TAGS.StudyDescription] || 'Not Available'}
                     </Typography>
                   </Grid>
 
@@ -254,7 +254,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {formatDate(patientData.StudyDate)}
+                      {formatDate(patientData[DICOM_TAGS.StudyDate])}
                     </Typography>
                   </Grid>
 
@@ -267,11 +267,11 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.BodyPartExamined}
+                      {patientData[DICOM_TAGS.BodyPartExamined]}
                     </Typography>
                   </Grid>
                   
-                  <Grid item xs={12} sm={4}>
+                  {/* <Grid item xs={12} sm={4}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Image fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
                       <Typography variant="body2" color="text.secondary">
@@ -279,9 +279,9 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.InstanceNumber || 'N/A'}
+                      {patientData[DICOM_TAGS.InstanceNumber] || 'N/A'}
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                   
                   <Grid item xs={12} sm={4}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -291,7 +291,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.SeriesNumber || 'N/A'}
+                      {patientData[DICOM_TAGS.SeriesNumber] || 'N/A'}
                     </Typography>
                   </Grid>
                   
@@ -303,7 +303,7 @@ const PatientDetails = () => {
                       </Typography>
                     </Box>
                     <Typography variant="body1">
-                      {patientData.StudyID || 'N/A'}
+                      {patientData[DICOM_TAGS.StudyID] || 'N/A'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -312,35 +312,8 @@ const PatientDetails = () => {
           </Grid>
         </Grid>
       </Paper>
-      
-      {/* <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-        
-      </Box> */}
     </Box>
   );
 };
 
 export default PatientDetails;
-
-// import { useParams } from "react-router-dom";
-// import { useSelector } from "react-redux";
-
-// const PatientDetails = () => {
-//   const { patientId } = useParams();
-//   const patientData = useSelector((state) => state.patient.patient);
-
-//   return (
-//     <div>
-//       <h1>Patient Details</h1>
-//       <p>Patient ID: {patientId}</p>
-//       {patientData ? (
-//         <pre>{JSON.stringify(patientData, null, 2)}</pre>
-//       ) : (
-//         <p>No patient data found.</p>
-//       )}
-//     </div>
-//   );
-// };
-
-
-// export default PatientDetails;
