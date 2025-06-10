@@ -45,7 +45,7 @@ DICOM_TAGS = {
     "StudyInstanceUID": "0020000D",
     "AccessionNumber": "00080050",
     "StudyTime": "00080030",
-    "ReferringPhysicianName": "00080090"
+    "ReferringPhysicianName": "00080090",
 
     # Series Information
     "SeriesInstanceUID": "0020000E",

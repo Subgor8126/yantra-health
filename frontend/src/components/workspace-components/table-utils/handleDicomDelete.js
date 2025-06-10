@@ -6,7 +6,7 @@ import deleteDialog from './DeleteDialog';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const handleDicomDelete = async (userId, fileKey) => {
+const handleDicomDelete = async (userId, fileKey, recordType) => {
     // const dispatch = useDispatch();
 
     // confirmation = deleteDialog();
@@ -16,7 +16,7 @@ const handleDicomDelete = async (userId, fileKey) => {
     // }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/delete-data-by-file-key?userId=${userId}&fileKey=${fileKey}`, {
+        const response = await fetch(`${API_BASE_URL}/api/delete-data-by-file-key?userId=${userId}&fileKey=${fileKey}&recordType=${recordType}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

@@ -17,10 +17,13 @@ const dicomDataSlice = createSlice({
       },
       triggerRefresh: (state) => {
         state.refreshTable = !state.refreshTable;  // <-- Toggle state
+        localStorage.removeItem('patientData');
+        localStorage.removeItem('statsData');
+        localStorage.removeItem('studyData');
       },
       clearDicomData: (state) => {
         state.patient = null;
-        localStorage.removeItem("patient");
+        localStorage.removeItem("patientData");
       },
     },
 });

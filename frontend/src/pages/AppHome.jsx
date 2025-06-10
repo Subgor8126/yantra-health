@@ -21,13 +21,25 @@ function AppHome() {
     }
 
     if (auth.userId) {
-      fetch(`${import.meta.env.VITE_API_URL}/api/stats?userId=${auth.userId}`)
-        .then(res => res.json())
-        .then(data => setStats(data))
-        .catch(err => {
-          console.error("Error fetching stats:", err);
-          dispatch(setSnackbar({ open: true, message: "Failed to load stats", severity: "error" }));
-        });
+      const statsData = localStorage.getItem("statsData");
+      if (statsData) {
+        setStats(JSON.parse(statsData));
+      } else {
+        fetch(`${import.meta.env.VITE_API_URL}/api/stats?userId=${auth.userId}`)
+          .then(res => res.json())
+          .then(data => {
+            setStats(data);
+            localStorage.setItem("statsData", JSON.stringify(data));
+          })
+          .catch(err => {
+            console.error("Error fetching stats:", err);
+            dispatch(setSnackbar({ 
+              open: true, 
+              message: "Failed to load stats", 
+              severity: "error" 
+            }));
+          });
+      }
     }
   }, []);
 
@@ -53,7 +65,8 @@ function AppHome() {
               p: 3, 
               height: '100%',
               background: 'linear-gradient(90deg,rgb(255, 99, 9) 30%,rgb(102, 8, 82) 90%)',
-              color: 'white'
+              color: 'white',
+              borderRadius: '50px',
             }}
           >
             <Typography variant="h5" sx={{ mb: 2 }}>Workspace</Typography>
@@ -65,7 +78,6 @@ function AppHome() {
                 variant="contained" 
                 color="secondary"
                 startIcon={<DashboardIcon />}
-                sx={{ borderRadius: 2 }}
               >
                 Go To Workspace
               </Button>
@@ -85,7 +97,8 @@ function AppHome() {
               flexDirection: 'column',
               justifyContent: 'space-between',
               background: 'linear-gradient(135deg,rgb(22, 97, 172) 0%,rgb(0, 10, 104) 100%)',
-              color: 'white'
+              color: 'white',
+              borderRadius: '50px',
             }}
           >
             <Typography variant="h5" sx={{ mb: 2 }}>My Data Overview</Typography>
@@ -143,7 +156,7 @@ function AppHome() {
 
       {/* Graph Below */}
       {stats && !auth.isGuest && (
-        <Paper elevation={1} sx={{ p: 3, bgcolor: 'background.paper' }}>
+        <Paper elevation={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: '50px' }}>
           <Typography variant="h6" sx={{ mb: 2 }}>📈 Upload Trends</Typography>
           <LineChart
             xAxis={[{
@@ -162,104 +175,3 @@ function AppHome() {
 }
 
 export default AppHome;
-
-
-// ChatGPT UI
-// import React from "react";
-// import { Link } from "react-router-dom";
-// import { Typography, Container, Button, Box, Paper, Grid } from "@mui/material";
-// import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // Example Icon
-
-// function AppHome() {
-//   console.log("in app home");
-
-//   // Dummy handler functions
-//   const handleExplore = () => console.log("Exploring Workspaces");
-//   const handleRecentClick = (workspace) => console.log(`Opening ${workspace}`);
-
-//   return (
-//     <Container maxWidth="md" sx={{ mt: 6, textAlign: "center" }}>
-//       {/* Welcome Section */}
-//       <Paper
-//         elevation={4}
-//         sx={{
-//           bgcolor: "background.paper",
-//           p: 4,
-//           borderRadius: 3,
-//           textAlign: "center",
-//         }}
-//       >
-//         <Typography variant="h4" color="text.primary" gutterBottom>
-//           Welcome
-//         </Typography>
-//         <Typography variant="body1" color="text.secondary" gutterBottom>
-//           Manage your DICOM files and workspaces with ease.
-//         </Typography>
-//         <Link to="/app/workspace" style={{ textDecoration: "none" }}>
-//           <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-//             Go To Workspace
-//           </Button>
-//         </Link>
-//       </Paper>
-
-//       {/* Recent Workspaces (Dummy Data) */}
-//       <Box sx={{ mt: 4 }}>
-//         <Typography variant="h6" color="text.primary" gutterBottom>
-//           Recent Workspaces
-//         </Typography>
-//         <Grid container spacing={2} justifyContent="center">
-//           {["MRI Scans", "CT Scans", "X-Ray Analysis"].map((workspace, index) => (
-//             <Grid item key={index}>
-//               <Paper
-//                 elevation={3}
-//                 sx={{
-//                   p: 2,
-//                   width: 180,
-//                   textAlign: "center",
-//                   cursor: "pointer",
-//                   transition: "transform 0.2s",
-//                   "&:hover": { transform: "scale(1.05)", bgcolor: "primary.main" },
-//                 }}
-//                 onClick={() => handleRecentClick(workspace)}
-//               >
-//                 <WorkspacePremiumIcon sx={{ fontSize: 40, color: "secondary.main" }} />
-//                 <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-//                   {workspace}
-//                 </Typography>
-//               </Paper>
-//             </Grid>
-//           ))}
-//         </Grid>
-//       </Box>
-
-//       {/* Explore More Button */}
-//       <Button variant="outlined" color="secondary" sx={{ mt: 4 }} onClick={handleExplore}>
-//         Explore More
-//       </Button>
-//     </Container>
-//   );
-// }
-
-// export default AppHome;
-
-
-// original UI
-// import React from "react";
-// import { Link, Outlet } from "react-router-dom";
-// import { Typography, Container, Button} from '@mui/material';
-
-// function AppHome() {
-//   console.log("in app home")
-
-//       return (
-//           <Container>
-//             <Typography variant="h1">Welcome back!</Typography>
-//               <Link to="/app/workspace">
-//                 <Button variant="contained">Go To Workspace</Button>
-//               </Link>
-//               {/* <Link to="/app/files">Files</Link> */}
-//           </Container>
-//         );
-// }
-
-// export default AppHome;

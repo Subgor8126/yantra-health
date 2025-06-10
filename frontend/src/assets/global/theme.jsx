@@ -17,6 +17,7 @@ const theme = createTheme({
     text: {
       primary: '#ffffff', // White text
       secondary: '#aaaaaa', // Light gray text
+      tertiary: '#000000', // Lighter gray text
     },
     button:{
       primary: '#960527', // Custom primary color
@@ -34,7 +35,7 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: '50px',
           fontWeight: 600,
           padding: "10px 20px",
           textTransform: "none",

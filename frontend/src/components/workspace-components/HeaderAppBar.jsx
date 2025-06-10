@@ -17,76 +17,30 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import StorageIcon from '@mui/icons-material/Storage';
 import { useAuthCustom } from '../../hooks/useAuthCustom';
+import { useFileUpload } from '../../hooks/useFileUpload'; // Import the custom hook
 import { useDispatch } from 'react-redux';
-import { triggerRefresh } from '../../redux/slices/dicomDataSlice';
 import { setSnackbar } from '../../redux/slices/snackbarSlice';
 import ProfilePage from './ProfilePage';
 import { useNavigate } from 'react-router-dom';
 import { UploadButton } from './table-utils';
 
 export default function HeaderAppBar() {
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadingStudy, setUploadingStudy] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  
   const auth = useAuthCustom();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Use the custom upload hook
+  const { handleDicomUpload, uploading, uploadingStudy } = useFileUpload();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-  // Upload handlers
-  const handleDicomUpload = async (filesArray, isStudy) => {
-    if (!filesArray || filesArray.length === 0) {
-      dispatch(setSnackbar({ open: true, message: "Please select a file or folder!", severity: "error" }));
-      return;
-    }
-  
-    try {
-      const token = auth.tokens?.access_token;
-      if (!token) throw new Error("User is not authenticated");
-
-      if (isStudy) {
-        console.log("Uploading study...");
-        setUploadingStudy(true);
-      }
-      else{
-        setUploading(true);
-      }
-  
-      const formData = new FormData();
-      for (const file of filesArray) {
-        formData.append("files", file, file.webkitRelativePath || file.name);
-      }
-  
-      const response = await fetch(`${API_BASE_URL}/api/upload-dicom`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-  
-      const result = await response.json();
-  
-      if (!response.ok) throw new Error(result.error || "Upload failed");
-  
-      dispatch(setSnackbar({ open: true, message: result.message || "Upload successful!", severity: "success" }));
-      setTimeout(() => dispatch(triggerRefresh()), 1000);
-  
-    } catch (error) {
-      dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
-    } finally {
-      setUploading(false);
-      setUploadingStudy(false);
-    }
-  };
-
-  // Menu handlers
+  // Menu handlers (unchanged)
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -123,6 +77,9 @@ export default function HeaderAppBar() {
     handleMenuClose();
   };
 
+  // Rest of your component remains the same...
+  // (drawerContent, renderMenu, renderMobileMenu, return statement)
+
   // Side drawer content
   const drawerContent = (
     <Box sx={{ width: 250, pt: 2 }}>
@@ -153,7 +110,7 @@ export default function HeaderAppBar() {
     </Box>
   );
 
-  // Menu components
+  // Menu components (same as before, just using the hook's state)
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
@@ -188,7 +145,6 @@ export default function HeaderAppBar() {
         </ListItemIcon>
         <ListItemText primary="Logout" />
       </MenuItem>
-
     </Menu>
   );
 
@@ -277,7 +233,7 @@ export default function HeaderAppBar() {
 
   return (
     <>
-      <AppBar position="static" elevation={2} sx={{ background: 'primary' }}>
+      <AppBar position="static" elevation={2} sx={{ background: '#660033' }}>
         <Toolbar>
           <IconButton
             size="large"

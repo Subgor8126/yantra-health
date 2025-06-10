@@ -158,23 +158,52 @@ function PatientTable() {
   // This function handles the deletion of a DICOM file if the user confirms the deletion in the dialog
   const handleConfirmDelete = async () => {
     setDeleteDialogOpen(false);
-    setDeletingRowKey(selectedFileKey);  // Trigger skeleton state
+    setDeletingRowKey(selectedFileKey); // Trigger skeleton state
+  
     if (selectedFileKey) {
       try {
-        const deleteResponse = await handleDicomDelete(userId, selectedFileKey);
-        
-        if (deleteResponse?.DeleteText) {
-          dispatch(setSnackbar({ open: true, message: deleteResponse.DeleteText, severity: "success" }));
+        const deleteResponse = await handleDicomDelete(userId, selectedFileKey, 'patient');
+  
+        if (deleteResponse instanceof Error) {
+          dispatch(setSnackbar({
+            open: true,
+            message: deleteResponse.message || "Failed to delete patient.",
+            severity: "error"
+          }));
+        } else {
+          // Successful response
+          const { S3FilesDeleted, DeleteText, message } = deleteResponse;
+  
+          // Choose message based on available fields
+          const successMessage =
+            DeleteText ||
+            (S3FilesDeleted
+              ? "Patient and related files deleted successfully."
+              : "Patient deleted, but no DICOM files were present in S3.");
+  
+          dispatch(setSnackbar({
+            open: true,
+            message: successMessage,
+            severity: "success"
+          }));
+  
+          // Cleanup and refresh
+          localStorage.removeItem('patientData');
+          localStorage.removeItem('statsData');
+          localStorage.removeItem('studyData');
           dispatch(triggerRefresh());
-        } else if (deleteResponse?.message) {
-          dispatch(setSnackbar({ open: true, message: deleteResponse.message, severity: "error" }));
         }
       } catch (error) {
-        dispatch(setSnackbar({ open: true, message: error.message, severity: "error" }));
+        dispatch(setSnackbar({
+          open: true,
+          message: error.message || "Unexpected error during deletion.",
+          severity: "error"
+        }));
       }
     }
-    setDeletingRowKey(null)
-  };
+  
+    setDeletingRowKey(null);
+  };  
 
   // Cancel delete handler
   // This function closes the delete confirmation dialog and resets the selected file key
@@ -230,18 +259,26 @@ function PatientTable() {
   
     const fetchData = async () => {
       setLoading(true);
-  
-      const fetchedData = await handleDicomDataFetching(userId);
-  
-      // Check if data exists
-      if (fetchedData.length === 0) {
-        setDataExists(false);
-      } else {
-        setDataExists(true);
-      }
 
-      // Dispatch the fetched data to Redux
-      dispatch(setDicomData(fetchedData));
+      if (!localStorage.getItem('patientData')) {
+        const fetchedData = await handleDicomDataFetching(userId);
+  
+        // Check if data exists
+        if (fetchedData.length === 0) {
+          setDataExists(false);
+        } else {
+          setDataExists(true);
+        }
+  
+        // Dispatch the fetched data to Redux
+        dispatch(setDicomData(fetchedData));
+  
+        localStorage.setItem('patientData', JSON.stringify(fetchedData));
+      } else {
+        const cachedData = JSON.parse(localStorage.getItem('patientData'));
+        dispatch(setDicomData(cachedData));
+        setDataExists(cachedData.length > 0);
+      }
   
       // Reset pagination and filters
       setLoading(false);
@@ -310,8 +347,8 @@ function PatientTable() {
       sx={{ 
         width: '100%', 
         overflow: 'hidden',
-        borderRadius: 2,
-        backgroundColor: 'background.paper'
+        borderRadius: '50px 50px 0px 0px',
+        backgroundColor: 'background.paper',
       }}
     >
       {/* Table toolbar with search and filters */}
@@ -321,7 +358,7 @@ function PatientTable() {
           justifyContent: 'space-between', 
           alignItems: 'center', 
           p: 2, 
-          borderBottom: '1px solid rgba(224, 224, 224, 1)' 
+          borderBottom: '1px solid rgba(224, 224, 224, 1)',
         }}
       >
         <Typography variant="h5" fontWeight="bold" visibility={{ xs: 'hidden', sm: 'visible' }} color="text.primary">
@@ -351,7 +388,7 @@ function PatientTable() {
             </IconButton>
           </Paper>
           
-          <Tooltip title="Filter by modality">
+          {/* <Tooltip title="Filter by modality">
             <IconButton onClick={handleFilterOpen} sx={{ color: 'white' }}>
               <FilterListIcon />
               {activeFilters.length > 0 && (
@@ -375,7 +412,7 @@ function PatientTable() {
                 </Box>
               )}
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
           
           <Tooltip title="Refresh data">
             <IconButton onClick={handleRefresh} sx={{ color: 'white' }}>
@@ -526,7 +563,7 @@ function PatientTable() {
                           transition: "background 0.3s ease",
                           background: 'primary',
                           "&:hover": {
-                            background: "linear-gradient(90deg, rgba(15, 2, 73, 0.68) 0%, rgba(122, 4, 30, 0.66) 100%)",
+                            background: "#660033 !important",
                             cursor: "pointer",
                           },
                         }}
@@ -539,7 +576,7 @@ function PatientTable() {
                             return (
                               <TableCell key={column.id} align={column.align}>
                                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                                  <Tooltip title="View Study Details">
+                                  <Tooltip title="View Patient Details">
                                     <IconButton 
                                       size="small" 
                                       color="secondary"
@@ -552,7 +589,7 @@ function PatientTable() {
                                     </IconButton>
                                   </Tooltip>
                                   
-                                  <Tooltip title="Delete Study">
+                                  <Tooltip title="Delete Patient">
                                     <IconButton 
                                       size="small"
                                       color="text.primary"
@@ -583,7 +620,7 @@ function PatientTable() {
                               <TableCell key={column.id} align={column.align}>
                                 <Tooltip title={value === 'M' ? 'Male' : value === 'F' ? 'Female' : 'Other/Unknown'}>
                                   {value === 'M' ? (
-                                    <MaleIcon color="primary" />
+                                    <MaleIcon sx={{ color: "rgb(3, 34, 211)" }} />
                                   ) : value === 'F' ? (
                                     <FemaleIcon sx={{ color: 'rgb(215, 42, 94)' }} />
                                   ) : (

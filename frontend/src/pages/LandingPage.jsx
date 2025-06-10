@@ -15,7 +15,8 @@ import {
   useTheme,
   Divider,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Chip
 } from "@mui/material";
 import { 
   CloudUpload as CloudUploadIcon,
@@ -25,6 +26,14 @@ import {
   DevicesOther as DevicesIcon,
   MedicalServices as MedicalIcon,
   AccountCircle as AccountCircleIcon,
+  Visibility as VisibilityIcon,
+  Api as ApiIcon,
+  Dashboard as DashboardIcon,
+  Search as SearchIcon,
+  Share as ShareIcon,
+  Psychology as PsychologyIcon,
+  IntegrationInstructions as IntegrationIcon,
+  Business as BusinessIcon
 } from '@mui/icons-material';
 import { useDispatch } from "react-redux";
 import { setSnackbar } from "../redux/slices/snackbarSlice";
@@ -44,26 +53,103 @@ const LPHero = () => {
     console.log("Guest login initiated");
   }
   
-  const features = [
+  const liveFeatures = [
+    {
+      icon: <CloudUploadIcon fontSize="large" />,
+      title: "DICOM Studies Upload",
+      description: "Upload complete DICOM studies via folder upload with secure cloud storage",
+      status: "Live",
+      statusColor: "success"
+    },
+    {
+      icon: <VisibilityIcon fontSize="large" />,
+      title: "Integrated OHIF Viewer",
+      description: "View studies using the integrated OHIF Viewer with DICOMweb-compliant backend",
+      status: "Beta",
+      statusColor: "warning"
+    },
+    {
+      icon: <SecurityIcon fontSize="large" />,
+      title: "Secure Authentication",
+      description: "User authentication with normal and guest login options",
+      status: "Live",
+      statusColor: "success"
+    },
+    {
+      icon: <DashboardIcon fontSize="large" />,
+      title: "Real-time Dashboard",
+      description: "Live dashboard showing study count, storage usage with filters and search",
+      status: "Live",
+      statusColor: "success"
+    },
     {
       icon: <StorageIcon fontSize="large" />,
-      title: "Cloud Storage",
-      description: "Securely store your DICOM files in the cloud with unlimited scalability"
+      title: "AWS Serverless Architecture",
+      description: "Built on AWS Lambda, API Gateway, DynamoDB for unlimited scalability",
+      status: "Live",
+      statusColor: "success"
     },
+    {
+      icon: <ApiIcon fontSize="large" />,
+      title: "DICOMweb Compliant",
+      description: "Full WADO-RS and QIDO-RS compliance for seamless integration",
+      status: "Live",
+      statusColor: "success"
+    }
+  ];
+
+  const upcomingFeatures = [
     // {
-    //   icon: <SecurityIcon fontSize="large" />,
-    //   title: "HIPAA Compliant",
-    //   description: "Enterprise-grade security ensuring patient data remains protected"
+    //   icon: <SpeedIcon fontSize="large" />,
+    //   title: "Optimized Performance",
+    //   description: "Multi-frame scrolling and enhanced viewer performance",
+    //   status: "Coming Soon (Q3 2025)",
+    //   statusColor: "info"
     // },
     {
-      icon: <SpeedIcon fontSize="large" />,
-      title: "Fast Access",
-      description: "Rapid retrieval of studies from anywhere with an internet connection"
+      icon: <MedicalIcon fontSize="large" />,
+      title: "Structured Reporting",
+      description: "Radiologist-style reporting templates with free-text capabilities",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
     },
     {
-      icon: <DevicesIcon fontSize="large" />,
-      title: "Cross-Platform",
-      description: "Access your DICOM server from any device or operating system"
+      icon: <BusinessIcon fontSize="large" />,
+      title: "Admin Dashboard",
+      description: "Role-based access control with user management and upload limits",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    },
+    {
+      icon: <ShareIcon fontSize="large" />,
+      title: "Secure Study Sharing",
+      description: "Share studies via secure temporary links with time-based expiration",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    }
+  ];
+
+  const futureFeatures = [
+    {
+      icon: <PsychologyIcon fontSize="large" />,
+      title: "AI Anomaly Detection",
+      description: "AI-assisted anomaly detection powered by AWS Bedrock and SageMaker",
+      status: "Planned",
+      statusColor: "default"
+    },
+    {
+      icon: <IntegrationIcon fontSize="large" />,
+      title: "HL7 Bridge Integration",
+      description: "Seamless integration with RIS/HIS systems via HL7 bridge",
+      status: "Planned",
+      statusColor: "default"
+    },
+    {
+      icon: <BusinessIcon fontSize="large" />,
+      title: "Multi-tenant Architecture",
+      description: "Per-clinic isolation with zero-footprint teleradiology capabilities",
+      status: "Planned",
+      statusColor: "default"
     }
   ];
 
@@ -73,8 +159,7 @@ const LPHero = () => {
       color="secondary" 
       size="large"
       onClick={handleSignIn}
-      sx={{ 
-        borderRadius: 2,
+      sx={{
         px: 4,
         py: 1.5
       }}
@@ -88,7 +173,6 @@ const LPHero = () => {
       variant="outlined" 
       onClick={handleGuestSignIn}
       sx={{ 
-        borderRadius: 2,
         borderColor: 'white',
         color: 'white',
         px: 4,
@@ -102,19 +186,44 @@ const LPHero = () => {
       Try as Guest
     </Button>
     );
-  
-  // const testimonials = [
-  //   {
-  //     name: "Dr. Sarah Johnson",
-  //     role: "Radiologist",
-  //     comment: "This cloud DICOM solution has transformed our workflow. We can now access patient studies from anywhere, saving us valuable time."
-  //   },
-  //   {
-  //     name: "Memorial Hospital",
-  //     role: "Radiology Department",
-  //     comment: "The security features and ease of use make this platform indispensable for our growing imaging needs."
-  //   }
-  // ];
+
+  const FeatureCard = ({ feature, index }) => (
+    <Grid item xs={12} sm={6} md={4} key={index}>
+      <Card 
+        elevation={1} 
+        sx={{ 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          transition: 'transform 0.2s',
+          '&:hover': {
+            transform: 'translateY(-5px)'
+          },
+          borderRadius: '50px',
+        }}
+      >
+        <CardContent sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box sx={{ color: 'primary.main' }}>
+              {feature.icon}
+            </Box>
+            <Chip 
+              label={feature.status} 
+              color={feature.statusColor}
+              size="small"
+              variant="outlined"
+            />
+          </Box>
+          <Typography variant="h6" gutterBottom>
+            {feature.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {feature.description}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
 
   return (
     <Box sx={{ overflow: 'hidden' }}>
@@ -131,7 +240,7 @@ const LPHero = () => {
         zIndex: 1000,
         bgcolor: 'rgba(0, 0, 0, 0.6)',
         backdropFilter: 'blur(10px)',
-        borderRadius: '16px',
+        borderRadius: '50px',
         border: '1px solid rgb(255, 255, 255)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
         px: 4,
@@ -202,7 +311,8 @@ const LPHero = () => {
           pb: 12,
           position: 'relative',
           overflow: 'hidden',
-          pt: 14
+          pt: 14,
+          borderRadius: '0px 0px 50px 50px',
         }}
       >
 
@@ -212,12 +322,9 @@ const LPHero = () => {
               <Typography variant="h2" fontWeight="bold" sx={{ mb: 2 }}>
                 Cloud-Based DICOM Server
               </Typography>
-              <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-                Secure, scalable, and accessible medical imaging storage
+              <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
+                Upload DICOM studies, view with our integrated OHIF Viewer, and manage everything through a workspace.
               </Typography>
-              {/* <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
-                Store, view, and share DICOM files with ease. Our platform provides healthcare professionals with instant access to medical images from anywhere, on any device.
-              </Typography> */}
               <Stack direction="row" spacing={2}>
                 {/* {signInButton}
                 {tryAsGuestButton} */}
@@ -250,7 +357,8 @@ const LPHero = () => {
                 >
                   <Box sx={{ height: '50px', bgcolor: theme.palette.primary.dark, display: 'flex', alignItems: 'center', px: 2 }}>
                     <MedicalIcon sx={{ color: 'white', mr: 1 }} />
-                    <Typography variant="subtitle2" color="white">DICOM Viewer</Typography>
+                    <Typography variant="subtitle2" color="white">OHIF DICOM Viewer</Typography>
+                    <Chip label="Beta" color="warning" size="small" sx={{ ml: 1 }} />
                   </Box>
                   <Box sx={{ 
                     flex: 1, 
@@ -276,12 +384,12 @@ const LPHero = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Typography variant="subtitle2" gutterBottom>Patient Data</Typography>
+                    <Typography variant="subtitle2" gutterBottom>Study Dashboard</Typography>
                     <Divider sx={{ mb: 1 }} />
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary" display="block">ID: PAT-12345</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Study: CT Scan</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Date: 2025-03-11</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Studies: 1,247</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Storage: 2.3 TB</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Status: Active</Typography>
                     </Box>
                     <Button 
                       variant="outlined" 
@@ -299,49 +407,58 @@ const LPHero = () => {
         </Container>
       </Box>
 
-      {/* Features Section */}
+      {/* Live Features Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Powerful Features
+          Live Features
         </Typography>
         <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-          Our cloud-based DICOM server provides everything you need for medical imaging management
+          These features are fully implemented and ready for production use
         </Typography>
 
         <Grid container spacing={4}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card 
-                elevation={1} 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)'
-                  }
-                }}
-              >
-                <CardContent sx={{ textAlign: 'center', flex: 1 }}>
-                  <Box sx={{ color: 'primary.main', mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography variant="h6" gutterBottom>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+          {liveFeatures.map((feature, index) => (
+            <FeatureCard key={index} feature={feature} index={index} />
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Upcoming Features */}
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="lg">
+          <Typography variant="h3" align="center" gutterBottom>
+            Coming Soon - Next 1-2 Months
+          </Typography>
+          <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
+            Exciting features currently in development
+          </Typography>
+
+          <Grid container spacing={4}>
+            {upcomingFeatures.map((feature, index) => (
+              <FeatureCard key={index} feature={feature} index={index} />
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Future Roadmap */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" align="center" gutterBottom>
+          Future Roadmap - 3-6 Months
+        </Typography>
+        <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
+          Long-term vision for advanced capabilities
+        </Typography>
+
+        <Grid container spacing={4}>
+          {futureFeatures.map((feature, index) => (
+            <FeatureCard key={index} feature={feature} index={index} />
           ))}
         </Grid>
       </Container>
 
       {/* How It Works */}
-      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+      <Box sx={{ bgcolor: 'background.paper', py: 8, borderRadius: '0px 0px 50px 50px' }}>
         <Container maxWidth="lg">
           <Typography variant="h3" align="center" gutterBottom>
             How It Works
@@ -364,7 +481,7 @@ const LPHero = () => {
                 </Avatar>
                 <Typography variant="h6" gutterBottom>1. Authenticate</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Sign Up or Log In to your account
+                  Sign in with secure user authentication or try as guest
                 </Typography>
               </Box>
             </Grid>
@@ -380,9 +497,9 @@ const LPHero = () => {
                 }}>
                   <CloudUploadIcon fontSize="large" />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>2. Upload</Typography>
+                <Typography variant="h6" gutterBottom>2. Upload Studies</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Upload your DICOM files to our secure cloud platform
+                  Upload complete DICOM studies via folder upload to AWS S3 storage
                 </Typography>
               </Box>
             </Grid>
@@ -396,11 +513,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <DevicesIcon fontSize="large" />
+                  <VisibilityIcon fontSize="large" />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>3. Access</Typography>
+                <Typography variant="h6" gutterBottom>3. View & Analyze</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Access your studies from anywhere, on any device, anytime
+                  Access studies through integrated OHIF Viewer with real-time dashboard
                 </Typography>
               </Box>
             </Grid>
@@ -408,49 +525,8 @@ const LPHero = () => {
         </Container>
       </Box>
 
-      {/* Testimonials
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" align="center" gutterBottom>
-          Trusted by Healthcare Professionals
-        </Typography>
-
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          {testimonials.map((testimonial, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Paper 
-                elevation={2} 
-                sx={{ 
-                  p: 4, 
-                  height: '100%',
-                  bgcolor: index === 0 ? 'primary.main' : 'background.paper',
-                  color: index === 0 ? 'white' : 'inherit'
-                }}
-              >
-                <Typography variant="body1" paragraph sx={{ 
-                  fontStyle: 'italic',
-                  color: index === 0 ? 'white' : 'text.secondary'
-                }}>
-                  "{testimonial.comment}"
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {testimonial.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ 
-                    color: index === 0 ? 'rgba(255,255,255,0.7)' : 'text.secondary'
-                  }}>
-                    {testimonial.role}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Container> */}
-
       {/* CTA Section */}
       <Box sx={{ 
-        bgcolor: 'background.paper', 
         py: 8,
         borderTop: `1px solid ${theme.palette.divider}`
       }}>
@@ -458,9 +534,6 @@ const LPHero = () => {
           <Typography variant="h4" gutterBottom>
             Ready to get started?
           </Typography>
-          {/* <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
-            Join healthcare professionals worldwide who trust our cloud DICOM server
-          </Typography> */}
           <Button 
             variant="contained" 
             color="primary" 
@@ -478,17 +551,9 @@ const LPHero = () => {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: theme.palette.primary.dark, color: 'white', py: 4 }}>
+      <Box sx={{ bgcolor: theme.palette.primary.dark, color: 'white', py: 4, borderRadius: '50px 50px 0px 0px' }}>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                Cloud DICOM Server
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Secure medical imaging storage and access for healthcare professionals.
-              </Typography>
-            </Grid>
             <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Contact
@@ -499,19 +564,24 @@ const LPHero = () => {
             </Grid>
             {/* <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
-                Legal
+                Technology
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Privacy Policy
+                AWS Serverless • DICOMweb • OHIF Viewer
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                Architecture
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Terms of Service
+                Lambda • API Gateway • DynamoDB • S3
               </Typography>
             </Grid> */}
           </Grid>
           <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
-              © {new Date().getFullYear()} Cloud DICOM Server. All rights reserved.
+              © {new Date().getFullYear()} Yantra Health DICOM Server. All rights reserved.
             </Typography>
           </Box>
         </Container>
@@ -528,7 +598,6 @@ function LandingPage() {
   useEffect(() => {
     // Handling authentication logic
     if (auth.isAuthenticated && auth.tokens?.access_token) {
-      console.log("Got them goddamn tokens");
 
       const tokens = {
         access_token: auth.tokens.access_token,
@@ -536,25 +605,11 @@ function LandingPage() {
         id_token: auth.tokens.id_token
       };
 
-      console.log(`Authentication successful:
-        access token: ${tokens.access_token}
-        id token: ${tokens.id_token}
-        refresh token: ${tokens.refresh_token}`);
-
       return;
     }
-    console.log("--------------------------------------------------")
-    console.log(location);
-    console.log("Here's the location from landing page")
-    console.log(location.search)
-    console.log("What's this?")
-    console.log("--------------------------------------------------")
   }, [auth.isAuthenticated, location.search, navigate]);
 
   if (auth.error) {
-    console.log("_____________error_________________")
-    console.log(auth.error);
-    console.log("_____________error_________________")
     return <Box>Encountering error... {auth.error.message}</Box>;
   }
 

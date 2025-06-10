@@ -5,7 +5,7 @@ import { Stack, Box } from '@mui/material';
 function Workspace() {
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', bgcolor: '#660033' }}>
       <Stack>
         <HeaderAppBar/>
         <PatientTable/>
