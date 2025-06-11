@@ -558,8 +558,21 @@ const LPHero = () => {
               <Typography variant="subtitle1" gutterBottom>
                 Contact
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                gorwadkar@outlook.com
+              <Typography 
+                variant="body2"
+                component="a"
+                href="mailto:contact@yantrahealth.in"
+                sx={{
+                  opacity: 0.7,
+                  textDecoration: 'none',
+                  color: 'inherit', // keep it consistent with theme
+                  cursor: 'pointer',
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                contact@yantrahealth.in
               </Typography>
             </Grid>
             {/* <Grid item xs={12} md={4}>
