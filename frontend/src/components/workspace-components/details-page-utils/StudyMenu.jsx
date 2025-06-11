@@ -226,7 +226,7 @@ export default function StudyMenu({ study }) {
               </IconButton>
             </Tooltip>
             
-            <Tooltip title="Upload DICOM Files" arrow>
+            {!auth?.isGuest && <Tooltip title="Upload DICOM Files" arrow>
               <Button
                 onClick={handleOpenMenu}
                 sx={{
@@ -290,7 +290,7 @@ export default function StudyMenu({ study }) {
                   />
                 </MenuItem>
               </Menu>
-            </Tooltip>
+            </Tooltip>}
           </Box>
         </Box>
 
@@ -337,13 +337,13 @@ export default function StudyMenu({ study }) {
 
                 {/* Buttons */}
                 <Stack direction="row" sx={{ spacing: { xs: 2, sm: 1 } }} mt={3}>
-                <Tooltip title="Delete Study" arrow>
+                {!auth?.isGuest && <Tooltip title="Delete Study" arrow>
                   <IconButton
                   onClick={(event) => handleConfirmStudyDelete(event, userId, study["FileKey"])}
                   >
                   <DeleteIcon color="error" />
                   </IconButton>
-                </Tooltip>
+                </Tooltip>}
 
                 <Tooltip title="View in OHIF Viewer" arrow>
                   <IconButton
