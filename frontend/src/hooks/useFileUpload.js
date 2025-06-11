@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { triggerRefresh } from '../redux/slices/dicomDataSlice';
 import { setSnackbar } from '../redux/slices/snackbarSlice';
 import { useAuthCustom } from './useAuthCustom';
+import { removeLSItemsByPrefix } from '../components/workspace-components/table-utils';
 
 export const useFileUpload = () => {
   const [uploading, setUploading] = useState(false);
@@ -58,9 +59,9 @@ export const useFileUpload = () => {
       }));
       
       // Clear cached data
-      localStorage.removeItem("patientData");
-      localStorage.removeItem("statsData");
-      localStorage.removeItem("studyData");
+      removeLSItemsByPrefix("patientData");
+      removeLSItemsByPrefix("statsData");
+      removeLSItemsByPrefix("studyData");
       
       // Trigger refresh after a delay
       setTimeout(() => dispatch(triggerRefresh()), 1000);

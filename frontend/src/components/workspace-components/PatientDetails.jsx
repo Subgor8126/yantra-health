@@ -69,7 +69,8 @@ const PatientDetails = () => {
   const namedPatientData = getNamedData(patientData);
 
   useEffect(() => {
-    const cacheKey = "studyData";
+    const cacheKey = `studyData-${patient_id}-${fileKey}`;
+    console.log("🔍 Checking cache for studyData with key:", cacheKey);
     const cached = localStorage.getItem(cacheKey);
 
     if (cached) {

@@ -27,6 +27,7 @@ import { setSnackbar } from "../../../redux/slices/snackbarSlice";
 import handleDicomDelete from "../table-utils/handleDicomDelete";
 import { UploadButton } from "../table-utils";
 import { useFileUpload } from "../../../hooks/useFileUpload";
+import { removeLSItemsByPrefix } from "../table-utils";
 
 const handleViewInOHIF = async (studyUid) => {
      const ohifViewerUrl = `${import.meta.env.VITE_OHIF_URL}/viewer?StudyInstanceUIDs=${studyUid}`;
@@ -120,7 +121,7 @@ export default function StudyMenu({ study }) {
 
   // Function to handle refreshing studies
   const handleRefreshStudies = () => {
-    localStorage.removeItem('studyData');
+    removeLSItemsByPrefix('studyData');
     dispatch(triggerRefresh()); // or use a specific slice action
   };
   
@@ -335,8 +336,8 @@ export default function StudyMenu({ study }) {
               {/* Buttons */}
               <Stack direction="row" sx={{ spacing : {xs: 2, sm: 1} }} mt={3}>
                 <Tooltip title="Delete Study" arrow>
-                  <IconButton >
-                    <DeleteIcon color="error" onClick={(event) => handleConfirmStudyDelete(event, userId, study['FileKey'])} />
+                  <IconButton onClick={(event) => handleConfirmStudyDelete(event, userId, study['FileKey'])}>
+                    <DeleteIcon color="error" />
                   </IconButton>
                 </Tooltip>
 

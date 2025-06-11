@@ -52,6 +52,7 @@ import DeleteDialog from './table-utils/DeleteDialog';
 import { formatName, formatDate, formatAge } from './table-utils';
 // auth imports
 import { useAuthCustom } from '../../hooks/useAuthCustom';
+import { removeLSItemsByPrefix } from './table-utils';
 
 const isAuthGuest = localStorage.getItem('isGuest') === 'true';
 
@@ -188,9 +189,9 @@ function PatientTable() {
           }));
   
           // Cleanup and refresh
-          localStorage.removeItem('patientData');
-          localStorage.removeItem('statsData');
-          localStorage.removeItem('studyData');
+          removeLSItemsByPrefix('patientData');
+          removeLSItemsByPrefix('statsData');
+          removeLSItemsByPrefix('studyData');
           dispatch(triggerRefresh());
         }
       } catch (error) {
