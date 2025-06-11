@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import GridViewIcon from "@mui/icons-material/GridView";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useAuthCustom } from "../../../hooks/useAuthCustom";
@@ -28,6 +29,7 @@ import handleDicomDelete from "../table-utils/handleDicomDelete";
 import { UploadButton } from "../table-utils";
 import { useFileUpload } from "../../../hooks/useFileUpload";
 import { removeLSItemsByPrefix } from "../table-utils";
+import LabelValueRow from "./LabelValueRow";
 
 const handleViewInOHIF = async (studyUid) => {
      const ohifViewerUrl = `${import.meta.env.VITE_OHIF_URL}/viewer?StudyInstanceUIDs=${studyUid}`;
@@ -303,128 +305,119 @@ export default function StudyMenu({ study }) {
         >
           {study.map((study) => {
             {/* Single Study Card */}
-            return(
-            <Box
-            sx={{
-              borderRadius: 5,
-              bgcolor: "#fefefe",
-              px: 3,
-              py: 2,
-              display: "flex",
-              flexDirection: "column",
-              mb: 2,
-              boxShadow: 3,
-            }}
-          >
-            {/* Top Row */}
-            <Box
+            return (
+              <Box
               sx={{
+                borderRadius: 5,
+                bgcolor: "#fefefe",
+                px: 3,
+                py: 2,
+                display: "flex",
+                flexDirection: "column",
+                mb: 2,
+                boxShadow: 3,
+              }}
+              >
+              {/* Top Row */}
+              <Box
+                sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-              }}
-            >
-              <Box>
+                }}
+              >
+                <Box>
                 <Typography variant="h6" color="black">
                   {formatDate(study["StudyDate"]) || "Unknown Date"}
                 </Typography>
                 <Typography variant="body2" color="black">
                   {study["StudyTime"] || "Unknown Time"}
                 </Typography>
-              </Box>
+                </Box>
 
-              {/* Buttons */}
-              <Stack direction="row" sx={{ spacing : {xs: 2, sm: 1} }} mt={3}>
+                {/* Buttons */}
+                <Stack direction="row" sx={{ spacing: { xs: 2, sm: 1 } }} mt={3}>
                 <Tooltip title="Delete Study" arrow>
-                  <IconButton onClick={(event) => handleConfirmStudyDelete(event, userId, study['FileKey'])}>
-                    <DeleteIcon color="error" />
+                  <IconButton
+                  onClick={(event) => handleConfirmStudyDelete(event, userId, study["FileKey"])}
+                  >
+                  <DeleteIcon color="error" />
                   </IconButton>
                 </Tooltip>
 
                 <Tooltip title="View in OHIF Viewer" arrow>
-                  <IconButton 
-                      onClick={() => handleViewInOHIF(study["StudyInstanceUID"])}
-                      sx={{ 
-                        color: "#00bcd4",
-                        height: 40,
-                        width: 40,
-                        borderRadius: "50%",
-                        "&:hover": {
-                        backgroundColor: "#0B1073",
-                        }
-                      }}
+                  <IconButton
+                  onClick={() => handleViewInOHIF(study["StudyInstanceUID"])}
+                  sx={{
+                    color: "#00bcd4",
+                    height: 40,
+                    width: 40,
+                    borderRadius: "50%",
+                    "&:hover": {
+                    backgroundColor: "#0B1073",
+                    },
+                  }}
                   >
-                    <GridViewIcon />
+                  <GridViewIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Expand Study Details" arrow>
-                  <IconButton onClick={() =>
-                      setExpandedStudy(prev =>
-                        prev === study.StudyInstanceUID ? null : study.StudyInstanceUID
-                      )
-                    }
+                  <IconButton
+                  onClick={() =>
+                    setExpandedStudy((prev) =>
+                    prev === study.StudyInstanceUID ? null : study.StudyInstanceUID
+                    )
+                  }
                   >
-                    {expandedStudy ? (
-                      <RemoveCircleIcon color="secondary" />
-                    ) : (
-                      <AddCircleIcon color="secondary" />
-                    )}
+                  {expandedStudy === study.StudyInstanceUID ? (
+                    <RemoveCircleIcon color="secondary" />
+                  ) : (
+                    <AddCircleIcon color="secondary" />
+                  )}
                   </IconButton>
                 </Tooltip>
-              </Stack>
-            </Box>
+                </Stack>
+              </Box>
 
-            {/* Expanded Info */}
-            <Collapse in={expandedStudy === study.StudyInstanceUID}>
-              <Box mt={2}>
+              {/* Expanded Info */}
+              <Collapse in={expandedStudy === study.StudyInstanceUID}>
+                <Box mt={2}>
                 <Grid container spacing={2}>
                   {/* Left Column */}
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Study UID:</Box> {study["StudyInstanceUID"]}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Accession #:</Box> {study["AccessionNumber"]}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Description:</Box> {study["StudyDescription"]}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Institution:</Box> {study["InstitutionName"]}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Ref. Physician:</Box> {study["ReferringPhysicianName"]}
-                    </Typography>
+                  <LabelValueRow label="Study UID:" value={study["StudyInstanceUID"]} maxLength={30}/>
+                  <LabelValueRow label="Accession #:" value={study["AccessionNumber"]} />
+                  <LabelValueRow label="Description:" value={study["StudyDescription"]} />
+                  <LabelValueRow label="Institution:" value={study["InstitutionName"]} />
+                  <LabelValueRow label="Ref. Physician:" value={study["ReferringPhysicianName"]} />
                   </Grid>
 
                   {/* Right Column */}
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Study ID:</Box> {study["StudyID"] || "Unknown"}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Modalities:</Box> {study["Modality"] || "Unknown"}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Study Size:</Box>{" "}
-                      {study["TotalStudySizeBytes"]
-                        ? `${(study["TotalStudySizeBytes"] / (1024 * 1024)).toFixed(2)} MB`
-                        : "Unknown Size"}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Number Of Series:</Box>{" "}
-                      {study?.SeriesInstanceUIDList?.length || 0}
-                    </Typography>
-                    <Typography variant="body2" color="black">
-                      <Box component="span" fontWeight="bold">Number Of Instances:</Box>{" "}
-                      {study?.SOPInstanceUIDList?.length || 0}
-                    </Typography>
+                  <LabelValueRow label="Study ID:" value={study["StudyID"] || "Unknown"} />
+                  <LabelValueRow label="Modalities:" value={study["Modality"] || "Unknown"} />
+                  <LabelValueRow
+                    label="Study Size:"
+                    value={
+                    study["TotalStudySizeBytes"]
+                      ? `${(study["TotalStudySizeBytes"] / (1024 * 1024)).toFixed(2)} MB`
+                      : "Unknown Size"
+                    }
+                  />
+                  <LabelValueRow
+                    label="# Of Series:"
+                    value={study?.SeriesInstanceUIDList?.length || 0}
+                  />
+                  <LabelValueRow
+                    label="# Of Instances:"
+                    value={study?.SOPInstanceUIDList?.length || 0}
+                  />
                   </Grid>
                 </Grid>
+                </Box>
+              </Collapse>
               </Box>
-            </Collapse>
-          </Box>
-          )})}
+            );})}
         </Box>
       </CardContent>
     </Card>
