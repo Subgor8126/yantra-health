@@ -20,7 +20,7 @@ const theme = createTheme({
       tertiary: '#000000', // Lighter gray text
     },
     button:{
-      primary: '#960527', // Custom primary color
+      primary: '#660033', // Custom primary color
       secondary: '#4caf50', // Custom secondary color
     }
   },

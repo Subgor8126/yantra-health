@@ -204,7 +204,7 @@ const LPHero = () => {
             transform: 'translateY(-5px)'
           },
           borderRadius: '50px',
-          border: `3px solid #660033`,
+          border: `3px solid rgb(0, 255, 234)`,
           backgroundColor: 'background.paper',
         }}
       >
@@ -325,7 +325,16 @@ const LPHero = () => {
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={7}>
-              <Typography variant="h2" fontWeight="bold" sx={{ mb: 2 }}>
+              <Typography variant="h2" fontWeight="bold" sx={{ 
+                mb: 2,
+                background: 'linear-gradient(135deg,rgb(0, 255, 128) 0%,rgb(0, 255, 234) 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
+                Yantra Health
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
                 Cloud-Based DICOM Server
               </Typography>
               <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
@@ -363,17 +372,27 @@ const LPHero = () => {
                 >
                   <Box sx={{ height: '50px', bgcolor: theme.palette.primary.dark, display: 'flex', alignItems: 'center', px: 2 }}>
                     <MedicalIcon sx={{ color: 'white', mr: 1 }} />
-                    <Typography variant="subtitle2" color="white">OHIF DICOM Viewer</Typography>
+                    <Typography variant="subtitle2" color="white">OHIF Viewer</Typography>
                     <Chip label="Beta" color="warning" size="small" sx={{ ml: 1 }} />
                   </Box>
-                  <Box sx={{ 
-                    flex: 1, 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    background: 'repeating-linear-gradient(45deg, #1e1e1e, #1e1e1e 10px, #252525 10px, #252525 20px)'
-                  }}>
-                    <Typography variant="body2" color="text.secondary">Medical Imaging Preview</Typography>
+                  <Box 
+                    sx={{ 
+                      position: 'relative',
+                      backgroundImage: 'url(/images/ohif-viewer-lp-preview.png)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      height: '100%',
+                      width: '100%',
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center',
+                      filter: 'brightness(0.9) saturate(1.5)', // adds richness and dims slightly for contrast
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+                    }}
+                  >
                   </Box>
                 </Paper>
                 <Paper
@@ -390,12 +409,12 @@ const LPHero = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Typography variant="subtitle2" gutterBottom>Study Dashboard</Typography>
+                    <Typography variant="subtitle2" gutterBottom>Dashboard</Typography>
                     <Divider sx={{ mb: 1 }} />
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary" display="block">Studies: 1,247</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Storage: 2.3 TB</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Status: Active</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Studies: 24</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Storage: 1.4 GB</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Number Of Instances: 1853</Typography>
                     </Box>
                     <Button 
                       variant="outlined" 
@@ -483,7 +502,7 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <AccountCircleIcon fontSize="large" />
+                  <AccountCircleIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
                 <Typography variant="h6" gutterBottom>1. Authenticate</Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -501,7 +520,7 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <CloudUploadIcon fontSize="large" />
+                  <CloudUploadIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
                 <Typography variant="h6" gutterBottom>2. Upload Studies</Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -519,7 +538,7 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <VisibilityIcon fontSize="large" />
+                  <VisibilityIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
                 <Typography variant="h6" gutterBottom>3. View & Analyze</Typography>
                 <Typography variant="body2" color="text.secondary">
