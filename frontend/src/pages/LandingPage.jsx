@@ -16,7 +16,8 @@ import {
   Divider,
   Stack,
   CircularProgress,
-  Chip
+  Chip,
+  Link
 } from "@mui/material";
 import { 
   CloudUpload as CloudUploadIcon,
@@ -33,8 +34,11 @@ import {
   Share as ShareIcon,
   Psychology as PsychologyIcon,
   IntegrationInstructions as IntegrationIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  SmartToy as SmartToyIcon,
 } from '@mui/icons-material';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import CloudIcon from '@mui/icons-material/Cloud';
 import { useDispatch } from "react-redux";
 import { setSnackbar } from "../redux/slices/snackbarSlice";
 
@@ -99,13 +103,13 @@ const LPHero = () => {
   ];
 
   const upcomingFeatures = [
-    // {
-    //   icon: <SpeedIcon fontSize="large" />,
-    //   title: "Optimized Performance",
-    //   description: "Multi-frame scrolling and enhanced viewer performance",
-    //   status: "Coming Soon (Q3 2025)",
-    //   statusColor: "info"
-    // },
+    {
+      icon: <SmartToyIcon fontSize="large" />,
+      title: "AI Assistant (Preview)",
+      description: "Ask questions or get smart summaries using a multimodal AI assistant (early preview)",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    },
     {
       icon: <MedicalIcon fontSize="large" />,
       title: "Structured Reporting",
@@ -200,6 +204,8 @@ const LPHero = () => {
             transform: 'translateY(-5px)'
           },
           borderRadius: '50px',
+          border: `3px solid #660033`,
+          backgroundColor: 'background.paper',
         }}
       >
         <CardContent sx={{ textAlign: 'center', flex: 1 }}>
@@ -435,7 +441,7 @@ const LPHero = () => {
 
           <Grid container spacing={4}>
             {upcomingFeatures.map((feature, index) => (
-              <FeatureCard key={index} feature={feature} index={index} />
+              <FeatureCard key={index} feature={feature} index={index}/>
             ))}
           </Grid>
         </Container>
@@ -554,7 +560,7 @@ const LPHero = () => {
       <Box sx={{ bgcolor: theme.palette.primary.dark, color: 'white', py: 4, borderRadius: '50px 50px 0px 0px' }}>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Contact
               </Typography>
@@ -575,7 +581,35 @@ const LPHero = () => {
                 contact@yantrahealth.in
               </Typography>
             </Grid>
-            {/* <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                Developer Resources
+              </Typography>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <GitHubIcon fontSize="small" sx={{ mr: 1, color: 'inherit', opacity: 0.7 }} />
+                <Link 
+                  href="https://github.com/Subgor8126/yantra-health/tree/production" 
+                  target="_blank" 
+                  rel="noopener" 
+                  underline="hover" 
+                  color="inherit"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Source Code (GitHub Repo)
+                </Link>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CloudIcon fontSize="small" sx={{ mr: 1, color: 'inherit', opacity: 0.7 }} />
+                <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                  Cloud-native infra powered by AWS Lambda, S3, Cognito, DynamoDB, API Gateway
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* 
+            <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Technology
               </Typography>
@@ -583,6 +617,7 @@ const LPHero = () => {
                 AWS Serverless • DICOMweb • OHIF Viewer
               </Typography>
             </Grid>
+
             <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Architecture
@@ -590,8 +625,11 @@ const LPHero = () => {
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
                 Lambda • API Gateway • DynamoDB • S3
               </Typography>
-            </Grid> */}
+            </Grid>
+            */}
+
           </Grid>
+
           <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
               © {new Date().getFullYear()} Yantra Health DICOM Server. All rights reserved.
