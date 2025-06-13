@@ -15,7 +15,9 @@ import {
   useTheme,
   Divider,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Chip,
+  Link
 } from "@mui/material";
 import { 
   CloudUpload as CloudUploadIcon,
@@ -23,13 +25,27 @@ import {
   Speed as SpeedIcon,
   Storage as StorageIcon,
   DevicesOther as DevicesIcon,
-  MedicalServices as MedicalIcon
+  MedicalServices as MedicalIcon,
+  AccountCircle as AccountCircleIcon,
+  Visibility as VisibilityIcon,
+  Api as ApiIcon,
+  Dashboard as DashboardIcon,
+  Search as SearchIcon,
+  Share as ShareIcon,
+  Psychology as PsychologyIcon,
+  IntegrationInstructions as IntegrationIcon,
+  Business as BusinessIcon,
+  SmartToy as SmartToyIcon,
 } from '@mui/icons-material';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import CloudIcon from '@mui/icons-material/Cloud';
+import { useDispatch } from "react-redux";
+import { setSnackbar } from "../redux/slices/snackbarSlice";
 
-// This component replaces your LPHero component
 const LPHero = () => {
   const theme = useTheme();
   const auth = useAuthCustom();
+  const dispatch = useDispatch();
   
   const handleSignIn = () => {
     auth.login();
@@ -37,47 +53,261 @@ const LPHero = () => {
 
   const handleGuestSignIn = () => {
     auth.loginAsGuest();
+    dispatch(setSnackbar({ open: true, message: "Logging In as Guest", severity: "info" }));
     console.log("Guest login initiated");
   }
   
-  const features = [
+  const liveFeatures = [
     {
-      icon: <StorageIcon fontSize="large" />,
-      title: "Cloud Storage",
-      description: "Securely store your DICOM files in the cloud with unlimited scalability"
+      icon: <CloudUploadIcon fontSize="large" />,
+      title: "DICOM Studies Upload",
+      description: "Upload complete DICOM studies via folder upload with secure cloud storage",
+      status: "Live",
+      statusColor: "success"
+    },
+    {
+      icon: <VisibilityIcon fontSize="large" />,
+      title: "Integrated OHIF Viewer",
+      description: "View studies using the integrated OHIF Viewer with DICOMweb-compliant backend",
+      status: "Beta",
+      statusColor: "warning"
     },
     {
       icon: <SecurityIcon fontSize="large" />,
-      title: "HIPAA Compliant",
-      description: "Enterprise-grade security ensuring patient data remains protected"
+      title: "Secure Authentication",
+      description: "User authentication with normal and guest login options",
+      status: "Live",
+      statusColor: "success"
     },
     {
-      icon: <SpeedIcon fontSize="large" />,
-      title: "Fast Access",
-      description: "Rapid retrieval of studies from anywhere with an internet connection"
+      icon: <DashboardIcon fontSize="large" />,
+      title: "Real-time Dashboard",
+      description: "Live dashboard showing study count, storage usage with filters and search",
+      status: "Live",
+      statusColor: "success"
     },
     {
-      icon: <DevicesIcon fontSize="large" />,
-      title: "Cross-Platform",
-      description: "Access your DICOM server from any device or operating system"
-    }
-  ];
-  
-  const testimonials = [
-    {
-      name: "Dr. Sarah Johnson",
-      role: "Radiologist",
-      comment: "This cloud DICOM solution has transformed our workflow. We can now access patient studies from anywhere, saving us valuable time."
+      icon: <StorageIcon fontSize="large" />,
+      title: "AWS Serverless Architecture",
+      description: "Built on AWS Lambda, API Gateway, DynamoDB for unlimited scalability",
+      status: "Live",
+      statusColor: "success"
     },
     {
-      name: "Memorial Hospital",
-      role: "Radiology Department",
-      comment: "The security features and ease of use make this platform indispensable for our growing imaging needs."
+      icon: <ApiIcon fontSize="large" />,
+      title: "DICOMweb Compliant",
+      description: "Full WADO-RS and QIDO-RS compliance for seamless integration",
+      status: "Live",
+      statusColor: "success"
     }
   ];
 
+  const upcomingFeatures = [
+    {
+      icon: <SmartToyIcon fontSize="large" />,
+      title: "AI Assistant (Preview)",
+      description: "Ask questions or get smart summaries using a multimodal AI assistant (early preview)",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    },
+    {
+      icon: <MedicalIcon fontSize="large" />,
+      title: "Structured Reporting",
+      description: "Radiologist-style reporting templates with free-text capabilities",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    },
+    {
+      icon: <BusinessIcon fontSize="large" />,
+      title: "Admin Dashboard",
+      description: "Role-based access control with user management and upload limits",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    },
+    {
+      icon: <ShareIcon fontSize="large" />,
+      title: "Secure Study Sharing",
+      description: "Share studies via secure temporary links with time-based expiration",
+      status: "Coming Soon (Q3 2025)",
+      statusColor: "info"
+    }
+  ];
+
+  const futureFeatures = [
+    {
+      icon: <PsychologyIcon fontSize="large" />,
+      title: "AI Anomaly Detection",
+      description: "AI-assisted anomaly detection powered by AWS Bedrock and SageMaker",
+      status: "Planned",
+      statusColor: "default"
+    },
+    {
+      icon: <IntegrationIcon fontSize="large" />,
+      title: "HL7 Bridge Integration",
+      description: "Seamless integration with RIS/HIS systems via HL7 bridge",
+      status: "Planned",
+      statusColor: "default"
+    },
+    {
+      icon: <BusinessIcon fontSize="large" />,
+      title: "Multi-tenant Architecture",
+      description: "Per-clinic isolation with zero-footprint teleradiology capabilities",
+      status: "Planned",
+      statusColor: "default"
+    }
+  ];
+
+  const signInButton = (
+    <Button 
+      variant="contained" 
+      color="secondary" 
+      size="large"
+      onClick={handleSignIn}
+      sx={{
+        px: 4,
+        py: 1.5
+      }}
+    >
+      Sign In
+    </Button>
+  );
+
+  const tryAsGuestButton = (
+    <Button 
+      variant="outlined" 
+      onClick={handleGuestSignIn}
+      sx={{ 
+        borderColor: 'white',
+        color: 'white',
+        px: 4,
+        py: 1.5,
+        '&:hover': {
+          borderColor: 'white',
+          backgroundColor: 'rgba(255,255,255,0.1)'
+        }
+      }}
+    >
+      Try as Guest
+    </Button>
+    );
+
+  const FeatureCard = ({ feature, index }) => (
+    <Grid item xs={12} sm={6} md={4} key={index}>
+      <Card 
+        elevation={1} 
+        sx={{ 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          transition: 'transform 0.2s',
+          '&:hover': {
+            transform: 'translateY(-5px)'
+          },
+          borderRadius: '50px',
+          border: `3px solid rgb(0, 255, 234)`,
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <CardContent sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box sx={{ color: 'primary.main' }}>
+              {feature.icon}
+            </Box>
+            <Chip 
+              label={feature.status} 
+              color={feature.statusColor}
+              size="small"
+              variant="outlined"
+            />
+          </Box>
+          <Typography variant="h6" gutterBottom>
+            {feature.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {feature.description}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+
   return (
     <Box sx={{ overflow: 'hidden' }}>
+
+      {/* Navigation */}
+      <Box
+      sx={{
+        position: 'fixed',
+        top: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '90%',
+        maxWidth: '1200px',
+        zIndex: 1000,
+        bgcolor: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '50px',
+        border: '1px solid rgb(255, 255, 255)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+        px: 4,
+        py: 1.5
+      }}
+    >
+        <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          py: { xs: 1, sm: 2 },
+          px: { xs: 2, sm: 4 },
+        }}
+      >
+        {/* Logo + Text */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/favicon-32x32.png"
+            alt="Yantra Health Logo"
+            style={{
+              height: 28,
+              width: 28,
+              marginRight: 10,
+              borderRadius: 4
+            }}
+          />
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: { xs: 0, sm: '1.25rem' },
+              background: 'linear-gradient(135deg, #FF1B6B 0%, #FF6B35 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              display: { xs: 'none', sm: 'inline' }
+            }}
+          >
+            Yantra Health
+          </Typography>
+        </Box>
+
+        {/* Buttons */}
+        <Stack
+          direction={{ xs: 'row', sm: 'row' }}
+          spacing={1}
+          sx={{
+            '& button': {
+              fontSize: { xs: '0.7rem', sm: '0.875rem' },
+              px: { xs: 1.5, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
+            },
+          }}
+        >
+          {signInButton}
+          {tryAsGuestButton}
+        </Stack>
+      </Box>
+    </Box>
+
       {/* Hero Section */}
       <Box 
         sx={{
@@ -86,76 +316,33 @@ const LPHero = () => {
           pt: 8,
           pb: 12,
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          pt: 14,
+          borderRadius: '0px 0px 50px 50px',
         }}
       >
-        {/* Abstract background elements */}
-        <Box 
-          sx={{
-            position: 'absolute',
-            width: '500px',
-            height: '500px',
-            borderRadius: '50%',
-            background: 'rgba(248, 4, 57, 0.92)',
-            top: '-200px',
-            right: '-100px',
-          }}
-        />
-        <Box 
-          sx={{
-            position: 'absolute',
-            width: '300px',
-            height: '300px',
-            borderRadius: '50%',
-            background: 'rgba(122, 6, 87, 0.7)',
-            bottom: '-100px',
-            left: '10%',
-          }}
-        />
 
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={7}>
-              <Typography variant="h2" fontWeight="bold" sx={{ mb: 2 }}>
+              <Typography variant="h2" fontWeight="bold" sx={{ 
+                mb: 2,
+                background: 'linear-gradient(135deg,rgb(0, 255, 128) 0%,rgb(0, 255, 234) 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
+                Yantra Health
+              </Typography>
+              <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
                 Cloud-Based DICOM Server
               </Typography>
-              <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-                Secure, scalable, and accessible medical imaging storage
-              </Typography>
               <Typography variant="body1" sx={{ mb: 4, maxWidth: '90%' }}>
-                Store, view, and share DICOM files with ease. Our platform provides healthcare professionals with instant access to medical images from anywhere, on any device.
+                Upload DICOM studies, view with our integrated OHIF Viewer, and manage everything through a workspace.
               </Typography>
               <Stack direction="row" spacing={2}>
-                <Button 
-                  variant="contained" 
-                  color="secondary" 
-                  size="large"
-                  onClick={handleSignIn}
-                  sx={{ 
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5
-                  }}
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleGuestSignIn}
-                  sx={{ 
-                    borderRadius: 2,
-                    borderColor: 'white',
-                    color: 'white',
-                    px: 4,
-                    py: 1.5,
-                    '&:hover': {
-                      borderColor: 'white',
-                      backgroundColor: 'rgba(255,255,255,0.1)'
-                    }
-                  }}
-                >
-                  Try as Guest
-                </Button>
+                {/* {signInButton}
+                {tryAsGuestButton} */}
               </Stack>
             </Grid>
             <Grid item xs={12} md={5}>
@@ -185,16 +372,27 @@ const LPHero = () => {
                 >
                   <Box sx={{ height: '50px', bgcolor: theme.palette.primary.dark, display: 'flex', alignItems: 'center', px: 2 }}>
                     <MedicalIcon sx={{ color: 'white', mr: 1 }} />
-                    <Typography variant="subtitle2" color="white">DICOM Viewer</Typography>
+                    <Typography variant="subtitle2" color="white">OHIF Viewer</Typography>
+                    <Chip label="Beta" color="warning" size="small" sx={{ ml: 1 }} />
                   </Box>
-                  <Box sx={{ 
-                    flex: 1, 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    background: 'repeating-linear-gradient(45deg, #1e1e1e, #1e1e1e 10px, #252525 10px, #252525 20px)'
-                  }}>
-                    <Typography variant="body2" color="text.secondary">Medical Imaging Preview</Typography>
+                  <Box 
+                    sx={{ 
+                      position: 'relative',
+                      backgroundImage: 'url(/images/ohif-viewer-lp-preview.png)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      height: '100%',
+                      width: '100%',
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center',
+                      filter: 'brightness(0.9) saturate(1.5)', // adds richness and dims slightly for contrast
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+                    }}
+                  >
                   </Box>
                 </Paper>
                 <Paper
@@ -211,12 +409,12 @@ const LPHero = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Typography variant="subtitle2" gutterBottom>Patient Data</Typography>
+                    <Typography variant="subtitle2" gutterBottom>Dashboard</Typography>
                     <Divider sx={{ mb: 1 }} />
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="caption" color="text.secondary" display="block">ID: PAT-12345</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Study: CT Scan</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">Date: 2025-03-11</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Studies: 24</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Storage: 1.4 GB</Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">Number Of Instances: 1853</Typography>
                     </Box>
                     <Button 
                       variant="outlined" 
@@ -224,7 +422,7 @@ const LPHero = () => {
                       color="primary"
                       fullWidth
                     >
-                      View Details
+                      Open in OHIF Viewer
                     </Button>
                   </Box>
                 </Paper>
@@ -234,49 +432,58 @@ const LPHero = () => {
         </Container>
       </Box>
 
-      {/* Features Section */}
+      {/* Live Features Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" align="center" gutterBottom>
-          Powerful Features
+          Live Features
         </Typography>
         <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-          Our cloud-based DICOM server provides everything you need for medical imaging management
+          These features are fully implemented and ready for production use
         </Typography>
 
         <Grid container spacing={4}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card 
-                elevation={1} 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)'
-                  }
-                }}
-              >
-                <CardContent sx={{ textAlign: 'center', flex: 1 }}>
-                  <Box sx={{ color: 'primary.main', mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography variant="h6" gutterBottom>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+          {liveFeatures.map((feature, index) => (
+            <FeatureCard key={index} feature={feature} index={index} />
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Upcoming Features */}
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="lg">
+          <Typography variant="h3" align="center" gutterBottom>
+            Coming Soon - Next 1-2 Months
+          </Typography>
+          <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
+            Exciting features currently in development
+          </Typography>
+
+          <Grid container spacing={4}>
+            {upcomingFeatures.map((feature, index) => (
+              <FeatureCard key={index} feature={feature} index={index}/>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Future Roadmap */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" align="center" gutterBottom>
+          Future Roadmap - 3-6 Months
+        </Typography>
+        <Typography variant="subtitle1" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
+          Long-term vision for advanced capabilities
+        </Typography>
+
+        <Grid container spacing={4}>
+          {futureFeatures.map((feature, index) => (
+            <FeatureCard key={index} feature={feature} index={index} />
           ))}
         </Grid>
       </Container>
 
       {/* How It Works */}
-      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+      <Box sx={{ bgcolor: 'background.paper', py: 8, borderRadius: '0px 0px 50px 50px' }}>
         <Container maxWidth="lg">
           <Typography variant="h3" align="center" gutterBottom>
             How It Works
@@ -295,11 +502,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <CloudUploadIcon fontSize="large" />
+                  <AccountCircleIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>1. Upload</Typography>
+                <Typography variant="h6" gutterBottom>1. Authenticate</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Upload your DICOM files securely to our cloud platform
+                  Sign in with secure user authentication or try as guest
                 </Typography>
               </Box>
             </Grid>
@@ -313,11 +520,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <StorageIcon fontSize="large" />
+                  <CloudUploadIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>2. Store</Typography>
+                <Typography variant="h6" gutterBottom>2. Upload Studies</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Your data is encrypted and stored in our HIPAA-compliant cloud
+                  Upload complete DICOM studies via folder upload to AWS S3 storage
                 </Typography>
               </Box>
             </Grid>
@@ -331,11 +538,11 @@ const LPHero = () => {
                   mb: 2,
                   mx: 'auto'
                 }}>
-                  <DevicesIcon fontSize="large" />
+                  <VisibilityIcon fontSize="large" sx={{ color: '#ffffff'}} />
                 </Avatar>
-                <Typography variant="h6" gutterBottom>3. Access</Typography>
+                <Typography variant="h6" gutterBottom>3. View & Analyze</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Access your studies from anywhere, on any device, anytime
+                  Access studies through integrated OHIF Viewer with real-time dashboard
                 </Typography>
               </Box>
             </Grid>
@@ -343,58 +550,14 @@ const LPHero = () => {
         </Container>
       </Box>
 
-      {/* Testimonials */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" align="center" gutterBottom>
-          Trusted by Healthcare Professionals
-        </Typography>
-
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          {testimonials.map((testimonial, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Paper 
-                elevation={2} 
-                sx={{ 
-                  p: 4, 
-                  height: '100%',
-                  bgcolor: index === 0 ? 'primary.main' : 'background.paper',
-                  color: index === 0 ? 'white' : 'inherit'
-                }}
-              >
-                <Typography variant="body1" paragraph sx={{ 
-                  fontStyle: 'italic',
-                  color: index === 0 ? 'white' : 'text.secondary'
-                }}>
-                  "{testimonial.comment}"
-                </Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {testimonial.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ 
-                    color: index === 0 ? 'rgba(255,255,255,0.7)' : 'text.secondary'
-                  }}>
-                    {testimonial.role}
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
       {/* CTA Section */}
       <Box sx={{ 
-        bgcolor: 'background.paper', 
         py: 8,
         borderTop: `1px solid ${theme.palette.divider}`
       }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
           <Typography variant="h4" gutterBottom>
             Ready to get started?
-          </Typography>
-          <Typography variant="body1" color="text.secondary" paragraph sx={{ mb: 4 }}>
-            Join healthcare professionals worldwide who trust our cloud DICOM server
           </Typography>
           <Button 
             variant="contained" 
@@ -413,43 +576,82 @@ const LPHero = () => {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: theme.palette.primary.dark, color: 'white', py: 4 }}>
+      <Box sx={{ bgcolor: theme.palette.primary.dark, color: 'white', py: 4, borderRadius: '50px 50px 0px 0px' }}>
         <Container maxWidth="lg">
           <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                Cloud DICOM Server
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Secure medical imaging storage and access for healthcare professionals.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
                 Contact
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                support@clouddicom.example.com
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                +1 (555) 123-4567
+              <Typography 
+                variant="body2"
+                component="a"
+                href="mailto:contact@yantrahealth.in"
+                sx={{
+                  opacity: 0.7,
+                  textDecoration: 'none',
+                  color: 'inherit', // keep it consistent with theme
+                  cursor: 'pointer',
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                contact@yantrahealth.in
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
               <Typography variant="subtitle1" gutterBottom>
-                Legal
+                Developer Resources
+              </Typography>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <GitHubIcon fontSize="small" sx={{ mr: 1, color: 'inherit', opacity: 0.7 }} />
+                <Link 
+                  href="https://github.com/Subgor8126/yantra-health/tree/production" 
+                  target="_blank" 
+                  rel="noopener" 
+                  underline="hover" 
+                  color="inherit"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Source Code (GitHub Repo)
+                </Link>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CloudIcon fontSize="small" sx={{ mr: 1, color: 'inherit', opacity: 0.7 }} />
+                <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                  Cloud-native infra powered by AWS Lambda, S3, Cognito, DynamoDB, API Gateway
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* 
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                Technology
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Privacy Policy
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.7 }}>
-                Terms of Service
+                AWS Serverless • DICOMweb • OHIF Viewer
               </Typography>
             </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                Architecture
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                Lambda • API Gateway • DynamoDB • S3
+              </Typography>
+            </Grid>
+            */}
+
           </Grid>
+
           <Box sx={{ mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <Typography variant="body2" sx={{ opacity: 0.7 }}>
-              © {new Date().getFullYear()} Cloud DICOM Server. All rights reserved.
+              © {new Date().getFullYear()} Yantra Health DICOM Server. All rights reserved.
             </Typography>
           </Box>
         </Container>
@@ -466,7 +668,6 @@ function LandingPage() {
   useEffect(() => {
     // Handling authentication logic
     if (auth.isAuthenticated && auth.tokens?.access_token) {
-      console.log("Got them goddamn tokens");
 
       const tokens = {
         access_token: auth.tokens.access_token,
@@ -474,25 +675,11 @@ function LandingPage() {
         id_token: auth.tokens.id_token
       };
 
-      console.log(`Authentication successful:
-        access token: ${tokens.access_token}
-        id token: ${tokens.id_token}
-        refresh token: ${tokens.refresh_token}`);
-
       return;
     }
-    console.log("--------------------------------------------------")
-    console.log(location);
-    console.log("Here's the location from landing page")
-    console.log(location.search)
-    console.log("What's this?")
-    console.log("--------------------------------------------------")
   }, [auth.isAuthenticated, location.search, navigate]);
 
   if (auth.error) {
-    console.log("_____________error_________________")
-    console.log(auth.error);
-    console.log("_____________error_________________")
     return <Box>Encountering error... {auth.error.message}</Box>;
   }
 
@@ -525,98 +712,3 @@ function LandingPage() {
 }
 
 export default LandingPage;
-
-
-// Original UI
-// import React from "react";
-// import { useAuthCustom } from "react-oidc-context";
-// import { useEffect, useState } from "react";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import { Box, Typography, Button, Container, InputLabel, Link, Stack, TextField } from "@mui/material";
-// import visuallyHidden from '@mui/utils/visuallyHidden';
-// import { styled } from '@mui/material/styles';
-// import StyledBox from "../assets/lp/StyledBox";
-// import LPHero from "../components/landing-page-components/LPHero";
-
-// function LandingPage() {
-
-//   const auth = useAuthCustom();
-//   const navigate = useNavigate();
-//   const location = useLocation();
-
-//   useEffect(() => {
-//     // Step 1: Check if the user is already authenticated
-//     if (auth.isAuthenticated && auth.user?.access_token) {
-//       console.log("Got them goddamn tokens");
-
-//       const tokens = { 
-//         access_token: auth.user?.access_token,
-//         refresh_token: auth.user?.refresh_token,
-//         id_token: auth.user?.id_token
-//       };
-
-//       // localStorage.setItem("access_token", tokens.access_token);
-//       // localStorage.setItem("id_token", tokens.id_token);
-//       // localStorage.setItem("refresh_token", tokens.refresh_token);
-
-//       console.log(`Authentication successful:
-//         access token: ${tokens.access_token}
-//         id token: ${tokens.id_token}
-//         refresh token: ${tokens.refresh_token}`);
-
-//       // Redirect to /app if on the landing page
-//       // if (window.location.pathname === "/") {
-//       //   navigate("/app/workspace", { replace: true });
-//       // }
-//       return;
-//     }
-//     console.log("--------------------------------------------------")
-//     console.log(location);
-//     console.log("Here's the location from landing page")
-//     console.log(location.search)
-//     console.log("What's this?")
-//     console.log("--------------------------------------------------")
-
-//     // Step 2: If user is NOT authenticated but there is an auth code in the URL, process it
-//     // const searchParams = new URLSearchParams(location.search);
-//     // const code = searchParams.get("code");
-//     // const state = searchParams.get("state");
-
-//     // if (code && state) {
-//     //   console.log("Detected auth code + state, processing signinCallback...");
-
-//     //   auth.signinCallback().catch(error => {
-//     //     console.error("Error during signinCallback:", error);
-//     //   });
-//     // }
-//   }, [auth.isAuthenticated, location.search, navigate]);
-
-//   if (auth.error) {
-//     console.log("_____________error_________________")
-//     console.log(auth.error);
-//     console.log("_____________error_________________")
-//     return <Box>Encountering error... {auth.error.message}</Box>;
-//   }
-
-//   if(auth.isLoading){
-//     return (
-//       <Box>
-//         Authenticating, Please Wait.............
-//       </Box>
-//     )
-//   }
-
-//   // Box is div with extra styling, mostly cause of the sx prop. Typography is for text, variant prop for type of txt
-//   // like h1 or h2, and p: 1 means a padding of 8 pixels because Material UI uses units like 1 = 8px. Just watch this
-//   // video, it's quick and awesome:- https://youtu.be/FB-sKY63AWo?si=6WVrqg8Tz2thoqNV
-//   return (
-    
-//     <LPHero/>
-
-//     // <Container>
-//     //   <LPHero/>
-//     // </Container>
-//   );
-// }
-
-// export default LandingPage;

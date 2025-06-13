@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import socket
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -30,19 +31,36 @@ SECRET_KEY = "django-insecure-=^!q0v3(+)h5wyqwcez@vzv5nre1*pb=@&mi%^4%rqe1_)b_5u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "dicomserveralb-1668809663.us-east-1.elb.amazonaws.com",
+    "localhost",
+    "yantrahealth.in",
+    "127.0.0.1",
+    ".compute.internal",  # AWS internal domains
+    "172.31.0.0/16",       # AWS default VPC CIDR (entire subnet)
+]
+
+# Add current container’s private IP to ALLOWED_HOSTS
+try:
+    hostname = socket.gethostname()
+    container_ip = socket.gethostbyname(hostname)
+    ALLOWED_HOSTS.append(container_ip)
+    print(ALLOWED_HOSTS)
+except Exception as e:
+    pass  # Log if needed, but don't break startup
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # React Local Dev
-    "http://your-frontend-domain.com",  # Production Frontend
-    "http://localhost:3000",  # OHIF Viewer
+    "https://yantrahealth.in",
 ]
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION")
 AWS_S3_CUSTOM_DOMAIN = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
+DATA_UPLOAD_MAX_NUMBER_FILES = 10000
 
 
 # Application definition

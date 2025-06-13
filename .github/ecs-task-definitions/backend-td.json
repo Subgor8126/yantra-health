@@ -1,0 +1,61 @@
+{
+  "family": "dicom-server-backend-task-def",
+  "containerDefinitions": [
+    {
+      "name": "dicom-server-backend",
+      "image": "PLACEHOLDER",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/dicom-server-backend-task-def",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "secrets": [
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_ACCESS_KEY_ID"
+        },
+        {
+          "name": "AWS_REGION",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_REGION"
+        },
+        {
+          "name": "AWS_S3_REGION",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_S3_REGION"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_SECRET_ACCESS_KEY"
+        },
+        {
+          "name": "AWS_STORAGE_BUCKET_NAME",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/AWS_STORAGE_BUCKET_NAME"
+        },
+        {
+          "name": "DICOM_DYNAMO_TABLE",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:975050380826:secret:prod/dicom-server/backend-env/DICOM_DYNAMO_TABLE"
+        }
+      ]
+    }
+  ],
+  "executionRoleArn": "arn:aws:iam::975050380826:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::975050380826:role/ECSExecTaskRole",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  }
+}

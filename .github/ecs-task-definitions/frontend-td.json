@@ -1,0 +1,49 @@
+{
+    "family": "dicom-server-frontend-task-def",
+    "containerDefinitions": [
+      {
+        "name": "dicom-server-frontend",
+        "image": "PLACEHOLDER",
+        "cpu": 0,
+        "portMappings": [
+          {
+            "name": "dicom-server-frontend-80-tcp",
+            "containerPort": 80,
+            "hostPort": 80,
+            "protocol": "tcp",
+            "appProtocol": "http"
+          }
+        ],
+        "essential": true,
+        "environment": [],
+        "environmentFiles": [],
+        "mountPoints": [],
+        "volumesFrom": [],
+        "ulimits": [],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/dicom-server-frontend-task-def",
+            "mode": "non-blocking",
+            "awslogs-create-group": "true",
+            "max-buffer-size": "25m",
+            "awslogs-region": "us-east-1",
+            "awslogs-stream-prefix": "ecs"
+          },
+          "secretOptions": []
+        },
+        "systemControls": []
+      }
+    ],
+    "executionRoleArn": "arn:aws:iam::975050380826:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "1024",
+    "memory": "2048",
+    "runtimePlatform": {
+      "cpuArchitecture": "X86_64",
+      "operatingSystemFamily": "LINUX"
+    }
+  }  

@@ -17,9 +17,10 @@ const theme = createTheme({
     text: {
       primary: '#ffffff', // White text
       secondary: '#aaaaaa', // Light gray text
+      tertiary: '#000000', // Lighter gray text
     },
     button:{
-      primary: '#960527', // Custom primary color
+      primary: '#660033', // Custom primary color
       secondary: '#4caf50', // Custom secondary color
     }
   },
@@ -34,13 +35,13 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
+          borderRadius: '50px',
           fontWeight: 600,
           padding: "10px 20px",
           textTransform: "none",
-          background: "#960527",
+          background: "linear-gradient(135deg, #960527 0%, #960527 100%)", // same color start-end
           color: "#ffffff",
-          // transition: "0.4s ease-in",
+          transition: "background 0.3s ease-in-out",
           "&:hover": {
             background: "linear-gradient(135deg, #7c041f 30%, #b71c4b 100%)",
           },

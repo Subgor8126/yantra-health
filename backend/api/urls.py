@@ -1,19 +1,21 @@
 from django.urls import path
-from .views import upload_dicom
-from .dicom_parser import parse_dicom_file
-from .ddb_utils import get_study_data_by_uid
-from .delete_utils import delete_data_by_file_key
-from .ohif_utils import generate_pre_signed_url_for_ohif
-from .ohif_utils import print_something
-from .ohif_utils import send_json_response_to_ohif
+from django.http import JsonResponse
+from api.views import upload_dicom
+from api.services import get_dicom_metadata
+from api.views import delete_data_by_file_key
+from api.views import print_something
+from api.services import get_stats
+
+def api_only_root(request):
+    return JsonResponse({"message": "Backend API is running."})
 
 urlpatterns = [
     path("upload-dicom", upload_dicom, name="upload-dicom"),
-    path("parse-dicom", parse_dicom_file, name="parse_dicom"),
-    path("get-study-data-by-uid", get_study_data_by_uid, name="get-study-data-by-uid"),
+    path("get-dicom-metadata", get_dicom_metadata, name="get-dicom-metadata"),
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
-    path("get-ohif-response", send_json_response_to_ohif, name="get-ohif-url"),
-    path("print-something", print_something, name="print-something")
+    path("print-something", print_something, name="print-something"),
+    path("stats", get_stats, name="stats"),
+    path("", api_only_root)
 ]
 
 # in the path() function call, the first argument is the actual path name, the second argument is the function to call

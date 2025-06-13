@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { removeLSItemsByPrefix } from "../../components/workspace-components/table-utils";
 
 const defaultDicomData = []
 
@@ -17,10 +18,13 @@ const dicomDataSlice = createSlice({
       },
       triggerRefresh: (state) => {
         state.refreshTable = !state.refreshTable;  // <-- Toggle state
+        removeLSItemsByPrefix('patientData');
+        removeLSItemsByPrefix('statsData');
+        removeLSItemsByPrefix('studyData');
       },
       clearDicomData: (state) => {
         state.patient = null;
-        localStorage.removeItem("patient");
+        removeLSItemsByPrefix("patientData");
       },
     },
 });

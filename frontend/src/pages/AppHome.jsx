@@ -1,79 +1,63 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Typography, 
-  Container, 
-  Button, 
-  Box, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardActions,
-  Divider,
-  Paper,
-  Avatar,
-  Chip,
-  IconButton
+  Typography, Container, Button, Box, Grid, Paper 
 } from '@mui/material';
-import { 
-  CloudUpload as CloudUploadIcon,
-  Dashboard as DashboardIcon,
-  Image as ImageIcon,
-  Bookmark as BookmarkIcon,
-  Notifications as NotificationsIcon,
-  Search as SearchIcon,
-  MoreVert as MoreVertIcon
-} from '@mui/icons-material';
-import { useAuthCustom } from "../hooks/useAuthCustom"; // Custom hook for authentication
+import { Dashboard as DashboardIcon } from '@mui/icons-material';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { useAuthCustom } from "../hooks/useAuthCustom";
 import { useDispatch } from "react-redux";
-import { setSnackbar } from "../redux/slices/snackbarSlice"; // Redux action for snackbar
+import { setSnackbar } from "../redux/slices/snackbarSlice";
 
 function AppHome() {
-  const [recentStudies] = useState([
-    { id: 1, patientId: "PAT-1023", studyDate: "2025-03-08", modality: "CT", images: 124 },
-    { id: 2, patientId: "PAT-4567", studyDate: "2025-03-10", modality: "MR", images: 56 }
-  ]);
-
   const auth = useAuthCustom();
   const dispatch = useDispatch();
 
-  // Dummy handler functions
-  const handleUpload = () => console.log("Upload initiated");
-  const handleSearch = () => console.log("Search initiated");
-  const handleNotifications = () => console.log("Notifications opened");
-  const handleBookmark = (studyId) => console.log("Bookmarked study", studyId);
-  const handleMoreOptions = (studyId) => console.log("More options for study", studyId);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     if (auth.isGuest){
       dispatch(setSnackbar({ open: true, message: "Logged in as guest with limited usage privileges", severity: "success" }));
     }
+
+    if (auth.userId) {
+      const statsData = localStorage.getItem("statsData");
+      if (statsData) {
+        setStats(JSON.parse(statsData));
+      } else {
+        fetch(`${import.meta.env.VITE_API_URL}/api/stats?userId=${auth.userId}`)
+          .then(res => res.json())
+          .then(data => {
+            setStats(data);
+            localStorage.setItem("statsData", JSON.stringify(data));
+          })
+          .catch(err => {
+            console.error("Error fetching stats:", err);
+            dispatch(setSnackbar({ 
+              open: true, 
+              message: "Failed to load stats", 
+              severity: "error" 
+            }));
+          });
+      }
+    }
   }, []);
+
+  const chartData = stats?.monthlyStudyCounts || {};
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header with welcome and quick actions */}
       <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Welcome back!
+            Dashboard
           </Typography>
-          {/* <Typography variant="subtitle1" color="text.secondary">
-            Your cloud DICOM server is running normally
-          </Typography> */}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <IconButton color="primary" onClick={handleSearch} sx={{ bgcolor: 'background.paper' }}>
-            <SearchIcon />
-          </IconButton>
-          <IconButton color="primary" onClick={handleNotifications} sx={{ bgcolor: 'background.paper' }}>
-            <NotificationsIcon />
-          </IconButton>
         </Box>
       </Box>
 
-      {/* Action cards */}
+      {/* Workspace + Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 6 }}>
+        {/* Workspace Card */}
         <Grid item xs={12} md={6}>
           <Paper 
             elevation={2}
@@ -81,19 +65,19 @@ function AppHome() {
               p: 3, 
               height: '100%',
               background: 'linear-gradient(90deg,rgb(255, 99, 9) 30%,rgb(102, 8, 82) 90%)',
-              color: 'white'
+              color: 'white',
+              borderRadius: '50px',
             }}
           >
             <Typography variant="h5" sx={{ mb: 2 }}>Workspace</Typography>
             <Typography variant="body2" sx={{ mb: 3 }}>
-              Access your DICOM studies, perform analysis, and collaborate with your team.
+              Access, view, and analyse your DICOM studies.
             </Typography>
             <Link to="/app/workspace" style={{ textDecoration: 'none' }}>
               <Button 
                 variant="contained" 
                 color="secondary"
                 startIcon={<DashboardIcon />}
-                sx={{ borderRadius: 2 }}
               >
                 Go To Workspace
               </Button>
@@ -101,210 +85,93 @@ function AppHome() {
           </Paper>
         </Grid>
         
+        {/* Stats Card */}
+        {!auth.isGuest ? (
         <Grid item xs={12} md={6}>
           <Paper 
             elevation={2}
             sx={{ 
               p: 3, 
               height: '100%',
-              bgcolor: 'background.paper',
-              background: 'linear-gradient(270deg, rgb(0, 89, 255), rgb(15, 1, 92))'
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              background: 'linear-gradient(135deg,rgb(22, 97, 172) 0%,rgb(0, 10, 104) 100%)',
+              color: 'white',
+              borderRadius: '50px',
             }}
           >
-            <Typography variant="h5" sx={{ mb: 2 }}>Upload DICOM Files</Typography>
-            <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-              Import new DICOM studies directly to your cloud storage.
-            </Typography>
-            <Button 
-              variant="contained" 
-              color="primary"
-              startIcon={<CloudUploadIcon />}
-              onClick={handleUpload}
-              sx={{ borderRadius: 2 }}
-            >
-              Upload Files
-            </Button>
+            <Typography variant="h5" sx={{ mb: 2 }}>My Data Overview</Typography>
+
+            {stats ? (
+              <>
+                <Grid container spacing={1}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">🧪 Total Instances</Typography>
+                    <Typography variant="h6">{stats.totalInstances}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">🗂 Total Studies</Typography>
+                    <Typography variant="h6">{stats.totalStudies}</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">⏳ Avg Study Size</Typography>
+                    <Typography variant="h6">{stats.averageStudySizeMB.toFixed(2)} MB</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2">⬆️ Largest Study</Typography>
+                    <Typography variant="h6">{stats.largestStudySizeMB.toFixed(2)} MB</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2">🕓 Last Upload</Typography>
+                    <Typography variant="h6">{new Date(stats.mostRecentUpload).toLocaleString()} UTC</Typography>
+                  </Grid>
+                </Grid>
+              </>
+            ) : (
+              <Typography>Loading stats...</Typography>
+            )}
           </Paper>
         </Grid>
+        ) : (
+          <Grid item xs={12} md={6}>
+          <Paper 
+            elevation={2}
+            sx={{ 
+              p: 3, 
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              background: 'linear-gradient(135deg,rgb(22, 97, 172) 0%,rgb(0, 10, 104) 100%)',
+              color: 'white'
+            }}
+          >
+            <Typography variant="h5" sx={{ mb: 2 }}>Log In as a User and Upload Files to view stats</Typography>
+
+          </Paper>
+        </Grid>
+        )}
       </Grid>
 
-      {/* Recent studies section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" sx={{ mb: 3 }}>Recent Studies</Typography>
-        <Grid container spacing={2}>
-          {recentStudies.map(study => (
-            <Grid item xs={12} sm={6} key={study.id}>
-              <Card elevation={1} sx={{ bgcolor: 'background.paper' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6">{study.patientId}</Typography>
-                    <Chip 
-                      label={study.modality} 
-                      size="small" 
-                      color="primary" 
-                      sx={{ fontWeight: 'bold' }}
-                    />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Study Date: {study.studyDate}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                    <ImageIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {study.images} images
-                    </Typography>
-                  </Box>
-                </CardContent>
-                <Divider />
-                <CardActions sx={{ justifyContent: 'space-between' }}>
-                  <Button 
-                    size="small" 
-                    component={Link} 
-                    to={`/app/workspace/${study.id}`}
-                    variant="contained"
-                  >
-                    View Study
-                  </Button>
-                  <Box>
-                    <IconButton size="small" onClick={() => handleBookmark(study.id)}>
-                      <BookmarkIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton size="small" onClick={() => handleMoreOptions(study.id)}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      {/* Statistics summary */}
-      <Paper elevation={1} sx={{ p: 3, bgcolor: 'background.paper' }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Storage Summary</Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={6} md={3}>
-            <Typography variant="body2" color="text.secondary">Total Studies</Typography>
-            <Typography variant="h5">327</Typography>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Typography variant="body2" color="text.secondary">Storage Used</Typography>
-            <Typography variant="h5">1.7 TB</Typography>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Typography variant="body2" color="text.secondary">Recent Activity</Typography>
-            <Typography variant="h5">12 views</Typography>
-          </Grid>
-          <Grid item xs={6} md={3}>
-            <Typography variant="body2" color="text.secondary">Active Users</Typography>
-            <Typography variant="h5">4</Typography>
-          </Grid>
-        </Grid>
-      </Paper>
+      {/* Graph Below */}
+      {stats && !auth.isGuest && (
+        <Paper elevation={1} sx={{ p: 3, bgcolor: 'background.paper', borderRadius: '50px' }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>📈 Upload Trends</Typography>
+          <LineChart
+            xAxis={[{
+              scaleType: 'point',
+              data: Object.keys(chartData),
+            }]}
+            series={[{
+              data: Object.values(chartData),
+            }]}
+            height={250}
+          />
+        </Paper>
+      )}
     </Container>
   );
 }
 
 export default AppHome;
-
-
-// ChatGPT UI
-// import React from "react";
-// import { Link } from "react-router-dom";
-// import { Typography, Container, Button, Box, Paper, Grid } from "@mui/material";
-// import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // Example Icon
-
-// function AppHome() {
-//   console.log("in app home");
-
-//   // Dummy handler functions
-//   const handleExplore = () => console.log("Exploring Workspaces");
-//   const handleRecentClick = (workspace) => console.log(`Opening ${workspace}`);
-
-//   return (
-//     <Container maxWidth="md" sx={{ mt: 6, textAlign: "center" }}>
-//       {/* Welcome Section */}
-//       <Paper
-//         elevation={4}
-//         sx={{
-//           bgcolor: "background.paper",
-//           p: 4,
-//           borderRadius: 3,
-//           textAlign: "center",
-//         }}
-//       >
-//         <Typography variant="h4" color="text.primary" gutterBottom>
-//           Welcome
-//         </Typography>
-//         <Typography variant="body1" color="text.secondary" gutterBottom>
-//           Manage your DICOM files and workspaces with ease.
-//         </Typography>
-//         <Link to="/app/workspace" style={{ textDecoration: "none" }}>
-//           <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-//             Go To Workspace
-//           </Button>
-//         </Link>
-//       </Paper>
-
-//       {/* Recent Workspaces (Dummy Data) */}
-//       <Box sx={{ mt: 4 }}>
-//         <Typography variant="h6" color="text.primary" gutterBottom>
-//           Recent Workspaces
-//         </Typography>
-//         <Grid container spacing={2} justifyContent="center">
-//           {["MRI Scans", "CT Scans", "X-Ray Analysis"].map((workspace, index) => (
-//             <Grid item key={index}>
-//               <Paper
-//                 elevation={3}
-//                 sx={{
-//                   p: 2,
-//                   width: 180,
-//                   textAlign: "center",
-//                   cursor: "pointer",
-//                   transition: "transform 0.2s",
-//                   "&:hover": { transform: "scale(1.05)", bgcolor: "primary.main" },
-//                 }}
-//                 onClick={() => handleRecentClick(workspace)}
-//               >
-//                 <WorkspacePremiumIcon sx={{ fontSize: 40, color: "secondary.main" }} />
-//                 <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-//                   {workspace}
-//                 </Typography>
-//               </Paper>
-//             </Grid>
-//           ))}
-//         </Grid>
-//       </Box>
-
-//       {/* Explore More Button */}
-//       <Button variant="outlined" color="secondary" sx={{ mt: 4 }} onClick={handleExplore}>
-//         Explore More
-//       </Button>
-//     </Container>
-//   );
-// }
-
-// export default AppHome;
-
-
-// original UI
-// import React from "react";
-// import { Link, Outlet } from "react-router-dom";
-// import { Typography, Container, Button} from '@mui/material';
-
-// function AppHome() {
-//   console.log("in app home")
-
-//       return (
-//           <Container>
-//             <Typography variant="h1">Welcome back!</Typography>
-//               <Link to="/app/workspace">
-//                 <Button variant="contained">Go To Workspace</Button>
-//               </Link>
-//               {/* <Link to="/app/files">Files</Link> */}
-//           </Container>
-//         );
-// }
-
-// export default AppHome;

@@ -7,10 +7,10 @@ import { store } from './redux/store.js';
 import { Provider } from 'react-redux';
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_QAGkAfsHK",
-  client_id: "1tm8ic8qk1sbamfkc166ja3q2u",
-  redirect_uri: "http://localhost:5173/",
-  response_type: "code",
+  authority: import.meta.env.VITE_COGNITO_AUTHORITY,
+  client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+  redirect_uri: import.meta.env.VITE_COGNITO_REDIRECT_URI,
+  response_type: import.meta.env.VITE_COGNITO_RESPONSE_TYPE,
   scope: "email openid phone",
 };
 
