@@ -204,13 +204,13 @@ const LPHero = () => {
             transform: 'translateY(-5px)'
           },
           borderRadius: '50px',
-          border: `3px solid rgb(0, 255, 234)`,
+          border: `3px solid #660033`,
           backgroundColor: 'background.paper',
         }}
       >
         <CardContent sx={{ textAlign: 'center', flex: 1 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-            <Box sx={{ color: 'primary.main' }}>
+            <Box sx={{ color: 'rgb(0, 255, 234)' }}>
               {feature.icon}
             </Box>
             <Chip 
