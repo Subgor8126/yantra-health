@@ -191,6 +191,7 @@ const LPHero = () => {
     </Button>
     );
 
+<<<<<<< production
     const FeatureCard = ({ feature, index }) => (
       <Grid item xs={12} sm={6} md={4} key={index}>
         <Card 
@@ -219,6 +220,29 @@ const LPHero = () => {
                 size="small"
                 variant="outlined"
               />
+=======
+  const FeatureCard = ({ feature, index }) => (
+    <Grid item xs={12} sm={6} md={4} key={index}>
+      <Card 
+        elevation={1} 
+        sx={{ 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          transition: 'transform 0.2s',
+          '&:hover': {
+            transform: 'translateY(-5px)'
+          },
+          borderRadius: '50px',
+          border: `3px solid #660033`,
+          backgroundColor: 'background.paper',
+        }}
+      >
+        <CardContent sx={{ textAlign: 'center', flex: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+            <Box sx={{ color: 'rgb(0, 255, 234)' }}>
+              {feature.icon}
+>>>>>>> master
             </Box>
             <Typography variant="h6" gutterBottom>
               {feature.title}
