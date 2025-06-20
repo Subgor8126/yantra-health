@@ -16,6 +16,8 @@ function AppHome() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
+    console.log("AppHome mounted");
+    console.log(`Auth status: isAuthenticated=${auth.isAuthenticated}, tokens=${JSON.stringify(auth.tokens)}`);
     if (auth.isGuest){
       dispatch(setSnackbar({ open: true, message: "Logged in as guest with limited usage privileges", severity: "success" }));
     }

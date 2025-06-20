@@ -6,7 +6,6 @@ import pydicom
 import os
 import traceback
 import pprint
-
 from api.services import get_s3_client
 from api.models import User, Patient, Study, Series, Instance
 

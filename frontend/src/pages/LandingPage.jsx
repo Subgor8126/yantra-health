@@ -666,49 +666,95 @@ function LandingPage() {
   const location = useLocation();
 
   useEffect(() => {
-    // Handling authentication logic
-    if (auth.isAuthenticated && auth.tokens?.access_token) {
-
-      const tokens = {
-        access_token: auth.tokens.access_token,
-        refresh_token: auth.tokens.refresh_token,
-        id_token: auth.tokens.id_token
-      };
-
-      return;
+    if (!auth.isLoading && auth.isAuthenticated) {
+      console.log("✅ Authenticated user on LandingPage, redirecting to /app");
+      navigate('/app');
     }
-  }, [auth.isAuthenticated, location.search, navigate]);
+  }, [
+    auth.isLoading,
+    auth.isAuthenticated,
+    navigate,
+  ]);
+
 
   if (auth.error) {
-    return <Box>Encountering error... {auth.error.message}</Box>;
+    return <Box>Encountered error: {auth.error.message}</Box>;
   }
 
-  if(auth.isLoading){
+  if (auth.isLoading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: 'background.default',
-        color: 'text.primary'
-      }}>
-          <Box 
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 2,
-          }}
-          >
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: 'background.default',
+          color: 'text.primary'
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
           <CircularProgress color="primary" size="3rem" />
           <Typography variant="h5">Please Wait</Typography>
         </Box>
       </Box>
-    )
+    );
   }
 
   return <LPHero />;
 }
 
 export default LandingPage;
+
+// function LandingPage() {
+//   const auth = useAuthCustom();
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   useEffect(() => {
+//     // Handling authentication logic
+//     if (auth.isAuthenticated && auth.tokens?.access_token) {
+
+//       const tokens = {
+//         access_token: auth.tokens.access_token,
+//         refresh_token: auth.tokens.refresh_token,
+//         id_token: auth.tokens.id_token
+//       };
+
+//       return;
+//     }
+//   }, [auth.isAuthenticated, location.search, navigate]);
+
+//   if (auth.error) {
+//     return <Box>Encountering error... {auth.error.message}</Box>;
+//   }
+
+//   if(auth.isLoading){
+//     return (
+//       <Box sx={{ 
+//         display: 'flex', 
+//         justifyContent: 'center', 
+//         alignItems: 'center',
+//         height: '100vh',
+//         backgroundColor: 'background.default',
+//         color: 'text.primary'
+//       }}>
+//           <Box 
+//           sx={{
+//             display: 'flex',
+//             flexDirection: 'column',
+//             alignItems: 'center',
+//             gap: 2,
+//           }}
+//           >
+//           <CircularProgress color="primary" size="3rem" />
+//           <Typography variant="h5">Please Wait</Typography>
+//         </Box>
+//       </Box>
+//     )
+//   }
+
+//   return <LPHero />;
+// }
+
+// export default LandingPage;

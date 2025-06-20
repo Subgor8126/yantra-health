@@ -1,10 +1,21 @@
+# Django imports
 from django.urls import path
 from django.http import JsonResponse
-from api.views import upload_dicom
-from api.services import get_dicom_metadata
-from api.views import delete_data_by_file_key
-from api.views import print_something
-from api.services import get_stats
+
+# Views imports
+from api.views import (
+    upload_dicom,
+    delete_data_by_file_key,
+    print_something,
+    check_user_exists,
+    create_user
+)
+
+# Services imports
+from api.services import (
+    get_dicom_metadata,
+    get_stats
+)
 
 def api_only_root(request):
     return JsonResponse({"message": "Backend API is running."})
@@ -13,6 +24,8 @@ urlpatterns = [
     path("upload-dicom", upload_dicom, name="upload-dicom"),
     path("get-dicom-metadata", get_dicom_metadata, name="get-dicom-metadata"),
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
+    path("check-user-exists", check_user_exists, name="check-user-exists"),
+    path("create-user", create_user, name="create-user"),
     path("print-something", print_something, name="print-something"),
     path("stats", get_stats, name="stats"),
     path("", api_only_root)
