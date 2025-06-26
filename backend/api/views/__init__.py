@@ -3,3 +3,8 @@ from .upload import upload_dicom
 from .print_something import print_something
 from .check_user_exists import check_user_exists
 from .create_user import create_user
+from .get_user import get_user
+from .get_patients import get_patients
+from .get_studies import get_studies
+from .delete_patients import delete_patients
+from .delete_studies import delete_studies

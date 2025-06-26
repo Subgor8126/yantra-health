@@ -3,9 +3,12 @@ from uuid import UUID
 from django.db.models import CharField
 from api.models import User
 from django.http import JsonResponse
+from api.services import get_user_id_from_request_token
+from django.views.decorators.http import require_http_methods
 
+@require_http_methods(['GET'])
 def check_user_exists(request):
-    user_id = request.GET.get("user_id")
+    user_id, _ = get_user_id_from_request_token(request)
     if not user_id:
         return JsonResponse({"error": "Missing user_id"}, status=400)
 

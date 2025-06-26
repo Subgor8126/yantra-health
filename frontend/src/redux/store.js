@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import patientReducer from "./slices/patientDataSlice"; // Import the slice
 import dicomDataReducer from "./slices/dicomDataSlice";
 import snackbarReducer from "./slices/snackbarSlice";
+import userReducer from "./slices/userSlice"; // Import the user slice
 
 export const store = configureStore({
   reducer: {
     patient: patientReducer, // Register the reducer
     dicomData: dicomDataReducer,
     snackbar: snackbarReducer,
+    user: userReducer, // Register the user reducer
   },
 });
 

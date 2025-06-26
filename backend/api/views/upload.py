@@ -1,22 +1,24 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from api.services import cognito_token_verification
+from api.services import get_s3_client, get_user_id_from_request_token
 from datetime import datetime
 import pydicom
 import os
 import traceback
-import pprint
-from api.services import get_s3_client
 from api.models import User, Patient, Study, Series, Instance
+from io import BytesIO
+
 
 def get_dicom_value(dicom_data, attribute, default=None):
     value = getattr(dicom_data, attribute, default)
     return str(value) if value not in [None, ""] else default
 
+
 def validate_dicom_consistency(files):
     if not files:
         return False, "No files provided"
-    
+
+    files[0].seek(0)
     first_ds = pydicom.dcmread(files[0], force=True)
     reference = {
         "PatientID": getattr(first_ds, "PatientID", None),
@@ -28,12 +30,17 @@ def validate_dicom_consistency(files):
         return False, "Missing required DICOM identifiers in first file"
 
     for i, f in enumerate(files[1:], 2):
+        f.seek(0)
         ds = pydicom.dcmread(f, force=True)
         for key in reference:
             if getattr(ds, key, None) != reference[key]:
                 return False, f"File {i} has inconsistent {key}"
-    
+
+    for f in files:
+        f.seek(0)
+
     return True, reference
+
 
 @csrf_exempt
 def upload_dicom(request):
@@ -41,16 +48,20 @@ def upload_dicom(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     try:
-        # Auth
-        auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            return JsonResponse({"error": "Missing Authorization header"}, status=401)
-        token = auth_header.split(" ")[1]
-        user_id = cognito_token_verification(token)
+        user_id, error_response = get_user_id_from_request_token(request)
+        if error_response:
+            return error_response
 
-        files = request.FILES.getlist("files")
-        if not files:
+        raw_files = request.FILES.getlist("files")
+        if not raw_files:
             return JsonResponse({"error": "No files uploaded"}, status=400)
+
+        files = []
+        for uploaded_file in raw_files:
+            buffer = BytesIO(uploaded_file.read())
+            buffer.name = uploaded_file.name
+            buffer.seek(0)
+            files.append(buffer)
 
         validation, result = validate_dicom_consistency(files)
         if not validation:
@@ -65,20 +76,13 @@ def upload_dicom(request):
         study_instance_uid = get_dicom_value(first_ds, "StudyInstanceUID")
         series_instance_uid = get_dicom_value(first_ds, "SeriesInstanceUID")
 
-        # Calculate total study size
-        total_study_size_bytes = sum(f.size for f in files)
+        total_study_size_bytes = sum(len(f.getvalue()) for f in files)
 
-        # ORM: User
         user_obj, _ = User.objects.get_or_create(
             user_id=user_id,
-            defaults={
-                "email": None,  # Set from token if available
-                "full_name": None,
-                "role": None
-            }
+            defaults={"email": None, "full_name": None, "role": None}
         )
 
-        # ORM: Patient
         patient_obj, _ = Patient.objects.get_or_create(
             patient_id=patient_id,
             defaults={
@@ -87,12 +91,12 @@ def upload_dicom(request):
                 "sex": get_dicom_value(first_ds, "PatientSex"),
                 "age": get_dicom_value(first_ds, "PatientAge"),
                 "weight": get_dicom_value(first_ds, "PatientWeight"),
+                "ethnicity": get_dicom_value(first_ds, "PatientEthnicGroup"),
                 "birth_date": get_dicom_value(first_ds, "PatientBirthDate"),
                 "extra_json": {}
             }
         )
 
-        # ORM: Study
         study_obj, _ = Study.objects.get_or_create(
             study_instance_uid=study_instance_uid,
             defaults={
@@ -110,15 +114,6 @@ def upload_dicom(request):
             }
         )
 
-        # Collect SOP Instance UIDs for the series
-        sop_instance_uid_list = []
-        for f in files:
-            ds = pydicom.dcmread(f, force=True)
-            sop_uid = get_dicom_value(ds, "SOPInstanceUID")
-            if sop_uid:
-                sop_instance_uid_list.append(sop_uid)
-
-        # ORM: Series
         series_obj, _ = Series.objects.get_or_create(
             series_instance_uid=series_instance_uid,
             defaults={
@@ -126,27 +121,25 @@ def upload_dicom(request):
                 "series_number": get_dicom_value(first_ds, "SeriesNumber"),
                 "series_description": get_dicom_value(first_ds, "SeriesDescription"),
                 "modality": get_dicom_value(first_ds, "Modality"),
-                "body_part_examined": get_dicom_value(first_ds, "BodyPartExamined"),
-                "number_of_instances": len(files),
-                "sop_instance_uid_list": sop_instance_uid_list
+                "body_part_examined": get_dicom_value(first_ds, "BodyPartExamined")
             }
         )
 
-        # Process all instances
         for f in files:
+            f.seek(0)
             ds = pydicom.dcmread(f, force=True)
 
             sop_uid = get_dicom_value(ds, "SOPInstanceUID")
             s3_key = f"{user_id}/{patient_id}/{study_instance_uid}/{series_instance_uid}/{sop_uid}.dcm"
-            f.seek(0)
-            s3.upload_fileobj(f, bucket, s3_key)
 
-            # Calculate file size
+            # Get file size BEFORE uploading (which closes the file)
             f.seek(0, 2)  # Seek to end
             file_size = f.tell()
-            f.seek(0)  # Reset
+            f.seek(0)  # Reset to beginning for upload
 
-            # Save instance record
+            # Upload to S3 (this will close the file)
+            s3.upload_fileobj(f, bucket, s3_key)
+
             Instance.objects.update_or_create(
                 sop_instance_uid=sop_uid,
                 defaults={
@@ -180,7 +173,4 @@ def upload_dicom(request):
     except Exception as e:
         print("Upload failed due to unexpected error:")
         traceback.print_exc()
-
-        return JsonResponse({
-            "error": str(e)[:500] if isinstance(e, str) else "Unexpected server error."
-        }, status=500)
+        return JsonResponse({"error": str(e)}, status=500)

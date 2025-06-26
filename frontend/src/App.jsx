@@ -9,6 +9,7 @@ import { PatientDetails } from './components/workspace-components';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSnackbar } from './redux/slices/snackbarSlice';
 import { Alert } from '@mui/material';
+import Layout from './layout/Layout';
 
 function App() {
   const auth = useAuthCustom();
@@ -41,9 +42,11 @@ function App() {
 
           {/* Protected section */}
           <Route element={<ProtectedRoutes auth={auth} />}>
-            <Route path="app" element={<AppHome />} />
-            <Route path="app/workspace" element={<Workspace />} />
-            <Route path="app/workspace/patient/:patient_id" element={<PatientDetails />} />
+            <Route element={<Layout />}>
+              <Route path="app" element={<AppHome />} />
+              <Route path="app/workspace" element={<Workspace />} />
+              <Route path="app/workspace/patient/:patient_id" element={<PatientDetails />} />
+            </Route>
           </Route>
         </Routes>
       </Router>

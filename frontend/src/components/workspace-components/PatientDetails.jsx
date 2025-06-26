@@ -8,53 +8,53 @@ import { ArrowBack } from '@mui/icons-material';
 import { useAuthCustom } from '../../hooks/useAuthCustom';
 import { PatientDetailsCard, DetailsHeaderBar, StudyMenu } from './details-page-utils';
 
-const DICOM_TAGS = {
-  "00100020": "PatientID",
-  "00100010": "PatientName",
-  "00100040": "PatientSex",
-  "00101010": "PatientAge",
-  "00101030": "PatientWeight",
-  "00100030": "PatientBirthDate",
-  "00080060": "Modality",
-  "00080050": "AccessionNumber",
-  "00180015": "BodyPartExamined",
-  "00200010": "StudyID",
-  "00200011": "SeriesNumber",
-  "00080020": "StudyDate",
-  "00080030": "StudyTime",
-  "00081030": "StudyDescription",
-  "00080090": "ReferringPhysicianName",
-  "00101020": "PatientSize",
-  "00102160": "EthnicGroup",
-  "00101040": "PatientAddress",
-  "00080080": "InstitutionName",
-  "0008103E": "SeriesDescription",
-  "00081090": "ManufacturerModelName",
-  "00180010": "StationName",
-  "00180022": "ScanOptions",
-  "00180060": "KVP",
-  "00181020": "SoftwareVersions",
-  "00181150": "ExposureTime",
-  "00181151": "XRayTubeCurrent",
-  "00181210": "ConvolutionKernel",
-  "0020000D": "StudyInstanceUID",
-  "0020000E": "SeriesInstanceUID"
-};
+// const DICOM_TAGS = {
+//   "00100020": "PatientID",
+//   "00100010": "PatientName",
+//   "00100040": "PatientSex",
+//   "00101010": "PatientAge",
+//   "00101030": "PatientWeight",
+//   "00100030": "PatientBirthDate",
+//   "00080060": "Modality",
+//   "00080050": "AccessionNumber",
+//   "00180015": "BodyPartExamined",
+//   "00200010": "StudyID",
+//   "00200011": "SeriesNumber",
+//   "00080020": "StudyDate",
+//   "00080030": "StudyTime",
+//   "00081030": "StudyDescription",
+//   "00080090": "ReferringPhysicianName",
+//   "00101020": "PatientSize",
+//   "00102160": "EthnicGroup",
+//   "00101040": "PatientAddress",
+//   "00080080": "InstitutionName",
+//   "0008103E": "SeriesDescription",
+//   "00081090": "ManufacturerModelName",
+//   "00180010": "StationName",
+//   "00180022": "ScanOptions",
+//   "00180060": "KVP",
+//   "00181020": "SoftwareVersions",
+//   "00181150": "ExposureTime",
+//   "00181151": "XRayTubeCurrent",
+//   "00181210": "ConvolutionKernel",
+//   "0020000D": "StudyInstanceUID",
+//   "0020000E": "SeriesInstanceUID"
+// };
 
-const getNamedData = (studyDataArray) => {
-  return studyDataArray.map((studyDataObject) =>
-    Object.entries(studyDataObject).reduce((acc, [key, value]) => {
-      const tagName = DICOM_TAGS[key] || key;
-      acc[tagName] = value;
-      return acc;
-    }, {})
-  );
-};
+// const getNamedData = (studyDataArray) => {
+//   return studyDataArray.map((studyDataObject) =>
+//     Object.entries(studyDataObject).reduce((acc, [key, value]) => {
+//       const tagName = DICOM_TAGS[key] || key;
+//       acc[tagName] = value;
+//       return acc;
+//     }, {})
+//   );
+// };
 
 const PatientDetails = () => {
   const { patient_id } = useParams();
   const [searchParams] = useSearchParams();
-  const fileKey = searchParams.get('fileKey');
+  // const fileKey = searchParams.get('fileKey');
 
   const dicomDataRefresh = useSelector((state) => state.dicomData.refreshTable);
 
@@ -65,11 +65,12 @@ const PatientDetails = () => {
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const auth = useAuthCustom();
   const userId = auth.userId;
+  const token = auth.tokens?.access_token
 
-  const namedPatientData = getNamedData(patientData);
+  // const namedPatientData = getNamedData(patientData);
 
   useEffect(() => {
-    const cacheKey = `studyData-${patient_id}-${fileKey}`;
+    const cacheKey = `studyData-${patient_id}`;
     console.log("🔍 Checking cache for studyData with key:", cacheKey);
     const cached = localStorage.getItem(cacheKey);
 
@@ -87,10 +88,11 @@ const PatientDetails = () => {
     const fetchStudyData = async () => {
       try {
         console.log("🌐 Fetching study data from API...");
-        const response = await fetch(`${API_BASE_URL}/api/get-dicom-metadata?userId=${userId}&recordType=study&fileKey=${fileKey}`, {
+        const response = await fetch(`${API_BASE_URL}/api/get-studies?patientId=${patient_id}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
           }
         });
 
@@ -99,19 +101,20 @@ const PatientDetails = () => {
         }
 
         const preliminaryStudyData = await response.json();
-        const named = getNamedData(preliminaryStudyData);
+        // const named = getNamedData(preliminaryStudyData);
+        const studies = preliminaryStudyData.studies
 
-        console.log("✅ API data fetched and transformed:", named);
+        console.log("✅ API data fetched and transformed:", studies);
 
-        setStudyData(named);
-        localStorage.setItem(cacheKey, JSON.stringify(named));
+        setStudyData(studies);
+        localStorage.setItem(cacheKey, JSON.stringify(studies));
       } catch (error) {
         console.error("❌ Error fetching study data:", error);
       }
     };
 
     fetchStudyData();
-  }, [patient_id, API_BASE_URL, userId, fileKey, dicomDataRefresh]);
+  }, [patient_id, API_BASE_URL, userId, dicomDataRefresh]);
 
   if (!patientDataObject) {
     return (
@@ -140,11 +143,11 @@ const PatientDetails = () => {
       }}
     >
       <Box sx={{ p: 1, pb: { xs: 5 }, height: '100px' }}>
-        <DetailsHeaderBar patientName={namedPatientData[0]['PatientName']} />
+        <DetailsHeaderBar patientName={patientData[0].name} />
       </Box>
       <Grid container spacing={2} padding={1}>
         <Grid item xs={12} md={5}>
-          <PatientDetailsCard patientData={namedPatientData[0]} />
+          <PatientDetailsCard patientData={patientData[0]} />
         </Grid>
         <Grid item xs={12} md={7}>
           <StudyMenu study={studyData} />

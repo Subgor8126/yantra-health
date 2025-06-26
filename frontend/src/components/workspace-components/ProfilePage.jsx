@@ -11,6 +11,9 @@ import { useAuthCustom } from '../../hooks/useAuthCustom';
 export default function ProfilePage({ onClose }) {
   const auth = useAuthCustom();
 
+  const userData = JSON.parse(localStorage.getItem('userData'))
+  console.log("User Data in profile page:", userData);
+
   if (auth.isGuest) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -63,7 +66,7 @@ export default function ProfilePage({ onClose }) {
           </Grid>
           <Grid item xs>
             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-              {auth.user?.username || 'User'}
+              {userData.full_name || 'User'}
             </Typography>
           </Grid>
         </Grid>
@@ -80,7 +83,7 @@ export default function ProfilePage({ onClose }) {
               </Typography>
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <BadgeIcon fontSize="small" />
-                {auth.user?.username || 'N/A'}
+                {userData.full_name || 'N/A'}
               </Typography>
             </Grid>
             <Grid item xs={12}>
@@ -89,7 +92,25 @@ export default function ProfilePage({ onClose }) {
               </Typography>
               <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <EmailIcon fontSize="small" />
-                {auth.user?.email || 'N/A'}
+                {userData.email || 'N/A'}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" color="text.secondary">
+                Role
+              </Typography>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EmailIcon fontSize="small" />
+                {userData.role || 'N/A'}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" color="text.secondary">
+                User ID
+              </Typography>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EmailIcon fontSize="small" />
+                {userData.user_id || 'N/A'}
               </Typography>
             </Grid>
           </Grid>

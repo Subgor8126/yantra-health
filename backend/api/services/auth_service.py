@@ -1,6 +1,7 @@
 import jwt
 import requests
 import os
+from django.http import JsonResponse
 
 COGNITO_REGION = os.getenv("AWS_REGION", "us-east-1")
 COGNITO_USERPOOL_ID = os.getenv("COGNITO_USERPOOL_ID", "us-east-1_QAGkAfsHK")
@@ -33,11 +34,27 @@ def cognito_token_verification(token):
         # before you had the audience parameter that has the Cognito App client ID
         # but you were verifying an access token which doesn't have the audience parameter, hence you changed the parameter
         # to issuer.
-        print(f"-------------------------payload: {payload}")
+        # print(f"-------------------------payload: {payload}")
         cognito_user_id = payload.get("sub")
-        print(f"User ID: {cognito_user_id}")
+        print(f"Verified User ID: {cognito_user_id}")
 
         return cognito_user_id  # Cognito user ID
     except Exception as e:
         print(f"Exception: {e}")
-        return Exception
+        return None  # ← Fixed: Return None instead of Exception class
+
+def get_user_id_from_request_token(request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None, JsonResponse({"error": "Missing or malformed Authorization header"}, status=401)
+
+    try:
+        token = auth_header.split(" ")[1]
+    except IndexError:
+        return None, JsonResponse({"error": "Malformed Authorization header"}, status=401)
+    
+    user_id = cognito_token_verification(token)
+    if not user_id:  # This will catch None properly now
+        return None, JsonResponse({"error": "Invalid or expired token"}, status=401)
+
+    return user_id, None

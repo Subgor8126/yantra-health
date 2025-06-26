@@ -6,6 +6,7 @@ from collections import defaultdict
 from decimal import Decimal
 from django.http import JsonResponse
 from boto3.dynamodb.conditions import Key
+from api.services import get_user_id_from_request_token
 
 # Initialize DynamoDB
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
@@ -13,7 +14,7 @@ table = dynamodb.Table(os.getenv('DICOM_DYNAMO_TABLE'))
 
 @csrf_exempt
 def get_stats(request):
-    user_id = request.GET.get("userId")
+    user_id, error_response = get_user_id_from_request_token(request)
     print(f"UserId HERERERERER: {user_id}")
     response = table.query(
         KeyConditionExpression=Key('UserId').eq(user_id)

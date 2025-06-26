@@ -3,13 +3,13 @@ import { formatDate, formatName, formatAge } from "../table-utils/formatHelpers"
 
 export default function PatientDetails({ patientData }) {
   const cleanedPatientData = { 
-    "Patient ID": patientData.PatientID || "N/A",
-    "Patient Age" : formatAge(patientData.PatientAge) || "N/A",
-    "Patient Name": formatName(patientData.PatientName) || "N/A",
-    "Patient Sex": patientData.PatientSex || "N/A",
-    "Patient DOB": formatDate(patientData.PatientDOB) || "N/A",
-    "Patient Address": patientData.PatientAddress || "N/A",
-    "Ethnicity": patientData.EthnicGroup || "N/A"
+    "Patient ID": patientData.patient_id || "N/A",
+    "Patient Age" : formatAge(patientData.age) || "N/A",
+    "Patient Name": formatName(patientData.name) || "N/A",
+    "Patient Sex": patientData.sex || "N/A",
+    "Patient DOB": formatDate(patientData.birth_date) || "N/A",
+    "Patient Address": patientData.address || "N/A",
+    "Ethnicity": patientData.ethnicity || "N/A"
    };
 
   return (

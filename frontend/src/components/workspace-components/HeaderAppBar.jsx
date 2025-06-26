@@ -20,6 +20,7 @@ import { useAuthCustom } from '../../hooks/useAuthCustom';
 import { useFileUpload } from '../../hooks/useFileUpload'; // Import the custom hook
 import { useDispatch } from 'react-redux';
 import { setSnackbar } from '../../redux/slices/snackbarSlice';
+import { setUser } from '../../redux/slices/userSlice';
 import ProfilePage from './ProfilePage';
 import { useNavigate } from 'react-router-dom';
 import { UploadButton } from './table-utils';
@@ -33,6 +34,44 @@ export default function HeaderAppBar() {
   const auth = useAuthCustom();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const getUserData = async () => {
+      console.log(`userId: ${auth.userId}`);
+      try {
+        if (auth.isAuthenticated) {
+          const token = auth.tokens?.access_token;
+          if (!token) throw new Error("User is not authenticated");
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/get-user`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+
+          const userData = await response.json();
+          if (userData) {
+            // Update user data in the Redux store
+            dispatch(setUser(userData));
+            localStorage.setItem('userData', JSON.stringify(userData)); // Persist user data
+          } else {
+            console.error('No user data found');
+          }
+        }
+      }
+      catch (error) {
+        console.error('Error fetching user data:', error);
+        dispatch(setSnackbar({ open: true, message: "Failed to fetch user data", severity: "error" }));
+      }
+    }
+
+    // Fetch user data when the component mounts
+    getUserData();
+  }, [])
   
   // Use the custom upload hook
   const { handleDicomUpload, uploading, uploadingStudy } = useFileUpload();

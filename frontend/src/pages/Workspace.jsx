@@ -7,7 +7,7 @@ function Workspace() {
   return (
     <Box sx={{ width: '100%', bgcolor: '#660033' }}>
       <Stack>
-        <HeaderAppBar/>
+        {/* <HeaderAppBar/> */}
         <PatientTable/>
         {/* <PatientDetails/> */}
       </Stack>

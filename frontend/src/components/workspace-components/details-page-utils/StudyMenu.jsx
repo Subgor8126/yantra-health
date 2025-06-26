@@ -38,11 +38,14 @@ const handleViewInOHIF = async (studyUid) => {
      window.open(ohifViewerUrl, "_blank");
 };
 
-export default function StudyMenu({ study }) {
+export default function StudyMenu({study}) {
+
+  console.log('Studies in StudyMenu: '+ study)
 
   // Custom hook to get authentication details
   const auth = useAuthCustom();
-  const userId = auth.userId;
+  // const userId = auth.userId;
+  const token = auth.tokens?.access_token
   
   // Redux dispatch function for managing global state
   const dispatch = useDispatch();
@@ -67,7 +70,7 @@ export default function StudyMenu({ study }) {
 
   // Function to handle the confirmation and deletion of a study
   // This function prompts the user for confirmation before deleting a study
-  const handleConfirmStudyDelete = async (event, userId, fileKey) => {
+  const handleConfirmStudyDelete = async (event, study_instance_uid) => {
     event.stopPropagation();
   
     const confirmDelete = window.confirm("Are you sure you want to delete this study?");
@@ -75,7 +78,7 @@ export default function StudyMenu({ study }) {
       return; // Cancel the deletion if the user says no
     }
   
-    console.log("FileKey in handleConfirmStudyDelete:", fileKey);
+    console.log("study_instance_uid in handleConfirmStudyDelete:", study_instance_uid);
   
     dispatch(setSnackbar({
       open: true,
@@ -84,7 +87,7 @@ export default function StudyMenu({ study }) {
     }));
   
     try {
-      const deleteResponse = await handleDicomDelete(userId, fileKey, "study");
+      const deleteResponse = await handleDicomDelete({token: token, studyInstanceUid: study_instance_uid});
   
       if (deleteResponse instanceof Error) {
         dispatch(setSnackbar({
@@ -127,46 +130,6 @@ export default function StudyMenu({ study }) {
     dispatch(triggerRefresh()); // or use a specific slice action
   };
   
-
-  // study = [
-  //   {
-  //     StudyDate: "19980505",
-  //     StudyTime: "101037",
-  //     StudyInstanceUID: "2.25.259822456388234982374",
-  //     AccessionNumber: "19610729ES32433",
-  //     StudyDescription: "Chest CT Scan",
-  //     InstitutionName: "Daniels, Fowler & Co.",
-  //     ReferringPhysicianName: "WILLIAM HAAS",
-  //     ModalitiesInStudy: "CT, MR, OT",
-  //     expandedStudy: false,
-  //   },
-  //   {
-  //     StudyDate: "20120712",
-  //     StudyTime: "143156",
-  //     StudyInstanceUID: "2.25.899112983712738481001",
-  //     AccessionNumber: "8134983",
-  //     StudyDescription: "Abdomen MRI",
-  //     InstitutionName: "NeuroMed Imaging",
-  //     ReferringPhysicianName: "DR. ASHLEY KIM",
-  //     ModalitiesInStudy: "MR, OT",
-  //     expandedStudy: false,
-  //   },
-  //   {
-  //     StudyDate: "20150905",
-  //     StudyTime: "191156",
-  //     StudyInstanceUID: "2.25.913829102398471264001",
-  //     AccessionNumber: "11235813",
-  //     StudyDescription: "Head PET-CT",
-  //     InstitutionName: "FusionScan Ltd.",
-  //     ReferringPhysicianName: "DR. LUIS MENDOZA",
-  //     ModalitiesInStudy: "PET, CT",
-  //     expandedStudy: false,
-  //     SeriesInstanceUIDList: [
-  //       "2.25.207506439191056754055271263682522889718",
-  //       "2.25.266330404550956556941727606810649148918"
-  //     ]
-  //   }
-  // ];
 
   return (
     <Card
@@ -303,20 +266,21 @@ export default function StudyMenu({ study }) {
             pr: 1,
           }}
         >
-          {study.map((study) => {
+          {study.map((studyItem) => {
             {/* Single Study Card */}
             return (
               <Box
-              sx={{
-                borderRadius: 5,
-                bgcolor: "#fefefe",
-                px: 3,
-                py: 2,
-                display: "flex",
-                flexDirection: "column",
-                mb: 2,
-                boxShadow: 3,
-              }}
+                key={studyItem.study_instance_uid} // Added key prop here
+                sx={{
+                  borderRadius: 5,
+                  bgcolor: "#fefefe",
+                  px: 3,
+                  py: 2,
+                  display: "flex",
+                  flexDirection: "column",
+                  mb: 2,
+                  boxShadow: 3,
+                }}
               >
               {/* Top Row */}
               <Box
@@ -328,10 +292,10 @@ export default function StudyMenu({ study }) {
               >
                 <Box>
                 <Typography variant="h6" color="black">
-                  {formatDate(study["StudyDate"]) || "Unknown Date"}
+                  {formatDate(studyItem["study_date"]) || "Unknown Date"}
                 </Typography>
                 <Typography variant="body2" color="black">
-                  {study["StudyTime"] || "Unknown Time"}
+                  {studyItem["StudyTime"] || studyItem["study_time"] || "Unknown Time"}
                 </Typography>
                 </Box>
 
@@ -339,7 +303,7 @@ export default function StudyMenu({ study }) {
                 <Stack direction="row" sx={{ spacing: { xs: 2, sm: 1 } }} mt={3}>
                 {!auth?.isGuest && <Tooltip title="Delete Study" arrow>
                   <IconButton
-                  onClick={(event) => handleConfirmStudyDelete(event, userId, study["FileKey"])}
+                  onClick={(event) => handleConfirmStudyDelete(event, studyItem.study_instance_uid)}
                   >
                   <DeleteIcon color="error" />
                   </IconButton>
@@ -347,7 +311,7 @@ export default function StudyMenu({ study }) {
 
                 <Tooltip title="View in OHIF Viewer" arrow>
                   <IconButton
-                  onClick={() => handleViewInOHIF(study["StudyInstanceUID"])}
+                  onClick={() => handleViewInOHIF(studyItem["study_instance_uid"])}
                   sx={{
                     color: "#00bcd4",
                     height: 40,
@@ -365,11 +329,11 @@ export default function StudyMenu({ study }) {
                   <IconButton
                   onClick={() =>
                     setExpandedStudy((prev) =>
-                    prev === study.StudyInstanceUID ? null : study.StudyInstanceUID
+                    prev === studyItem.study_instance_uid ? null : studyItem.study_instance_uid
                     )
                   }
                   >
-                  {expandedStudy === study.StudyInstanceUID ? (
+                  {expandedStudy === studyItem.study_instance_uid ? (
                     <RemoveCircleIcon color="secondary" />
                   ) : (
                     <AddCircleIcon color="secondary" />
@@ -380,37 +344,37 @@ export default function StudyMenu({ study }) {
               </Box>
 
               {/* Expanded Info */}
-              <Collapse in={expandedStudy === study.StudyInstanceUID}>
+              <Collapse in={expandedStudy === studyItem.study_instance_uid}>
                 <Box mt={2}>
                 <Grid container spacing={2}>
                   {/* Left Column */}
                   <Grid item xs={12} sm={6}>
-                  <LabelValueRow label="Study UID:" value={study["StudyInstanceUID"]} maxLength={30}/>
-                  <LabelValueRow label="Accession #:" value={study["AccessionNumber"]} />
-                  <LabelValueRow label="Description:" value={study["StudyDescription"]} />
-                  <LabelValueRow label="Institution:" value={study["InstitutionName"]} />
-                  <LabelValueRow label="Ref. Physician:" value={study["ReferringPhysicianName"]} />
+                  <LabelValueRow label="Study UID:" value={studyItem["study_instance_uid"] || "Unknown"} maxLength={30}/>
+                  <LabelValueRow label="Accession #:" value={studyItem["accession_number"] || "Unknown"} />
+                  <LabelValueRow label="Description:" value={studyItem["study_description"] || "Unknown"} />
+                  <LabelValueRow label="Institution:" value={studyItem["institution_name"] || "Unknown"} />
+                  <LabelValueRow label="Ref. Physician:" value={studyItem["referring_physician_name"] || "Unknown"} />
                   </Grid>
 
                   {/* Right Column */}
                   <Grid item xs={12} sm={6}>
-                  <LabelValueRow label="Study ID:" value={study["StudyID"] || "Unknown"} />
-                  <LabelValueRow label="Modalities:" value={study["Modality"] || "Unknown"} />
+                  <LabelValueRow label="Study ID:" value={studyItem["study_id"] || "Unknown"} />
+                  <LabelValueRow label="Modalities:" value={studyItem["modality"] || "Unknown"} />
                   <LabelValueRow
                     label="Study Size:"
                     value={
-                    study["TotalStudySizeBytes"]
-                      ? `${(study["TotalStudySizeBytes"] / (1024 * 1024)).toFixed(2)} MB`
+                    studyItem["total_study_size_bytes"]
+                      ? `${(studyItem["total_study_size_bytes"] / (1024 * 1024)).toFixed(2)} MB`
                       : "Unknown Size"
                     }
                   />
                   <LabelValueRow
                     label="# Of Series:"
-                    value={study?.SeriesInstanceUIDList?.length || 0}
+                    value={studyItem?.number_of_series || 0}
                   />
                   <LabelValueRow
                     label="# Of Instances:"
-                    value={study?.SOPInstanceUIDList?.length || 0}
+                    value={studyItem?.number_of_instances || 0}
                   />
                   </Grid>
                 </Grid>

@@ -58,13 +58,13 @@ const isAuthGuest = localStorage.getItem('isGuest') === 'true';
 
 // Defines the columns for the patient table
 const baseColumns = [
-  { id: '00100020', label: 'Patient ID', minWidth: 50, align: 'left', sortable: true },
-  { id: '00100010', label: 'Patient Name', minWidth: 50, align: 'left', sortable: true },
-  { id: '00100040', label: 'Patient Sex', minWidth: 30, align: 'center', sortable: true },
-  { id: '00101010', label: 'Patient Age', minWidth: 30, align: 'center', sortable: true },
-  { id: '00102160', label: 'Patient Ethnicity', minWidth: 30, align: 'center', sortable: true },
+  { id: 'patient_id', label: 'Patient ID', minWidth: 50, align: 'left', sortable: true },
+  { id: 'name', label: 'Patient Name', minWidth: 50, align: 'left', sortable: true },
+  { id: 'sex', label: 'Patient Sex', minWidth: 30, align: 'center', sortable: true },
+  { id: 'age', label: 'Patient Age', minWidth: 30, align: 'center', sortable: true },
+  { id: 'ethnicity', label: 'Patient Ethnicity', minWidth: 30, align: 'center', sortable: true },
   {
-    id: '00180015',
+    id: 'LatestStudy',
     label: 'Latest Study',
     minWidth: 40,
     align: 'left',
@@ -72,7 +72,7 @@ const baseColumns = [
     sortable: true
   },
   {
-    id: '00080020',
+    id: 'LatestStudyDate',
     label: 'Latest Study Date',
     minWidth: 40,
     align: 'left',
@@ -109,6 +109,7 @@ const getModalityColor = (modality) => {
 
 function PatientTable() {
   const auth = useAuthCustom();
+  const token = auth.tokens?.access_token
   const userId = auth.userId;
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -117,7 +118,7 @@ function PatientTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedFileKey, setSelectedFileKey] = useState(null);
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [dataExists, setDataExists] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -148,10 +149,10 @@ function PatientTable() {
 
   // Delete button handler
   // This function opens the delete confirmation dialog and sets the selected file key
-  const handleOpenDeleteDialog = (event, fileKey) => {
-    console.log("FileKey to be deleted: ", fileKey);
+  const handleOpenDeleteDialog = (event, patientId) => {
+    console.log("Patient ID to be deleted: ", patientId);
     event.stopPropagation(); // to stop the click from being interpreted as a click on the entire row
-    setSelectedFileKey(fileKey);
+    setSelectedPatientId(patientId);
     setDeleteDialogOpen(true);
   };
 
@@ -159,11 +160,16 @@ function PatientTable() {
   // This function handles the deletion of a DICOM file if the user confirms the deletion in the dialog
   const handleConfirmDelete = async () => {
     setDeleteDialogOpen(false);
-    setDeletingRowKey(selectedFileKey); // Trigger skeleton state
+    setDeletingRowKey(selectedPatientId); // Trigger skeleton state
   
-    if (selectedFileKey) {
+    if (selectedPatientId) {
       try {
-        const deleteResponse = await handleDicomDelete(userId, selectedFileKey, 'patient');
+        dispatch(setSnackbar({
+            open: true,
+            message: `Deleting Patient ${selectedPatientId}`,
+            severity: "info"
+          }))
+        const deleteResponse = await handleDicomDelete({token: token, patientId: selectedPatientId});
   
         if (deleteResponse instanceof Error) {
           dispatch(setSnackbar({
@@ -210,7 +216,7 @@ function PatientTable() {
   // This function closes the delete confirmation dialog and resets the selected file key
   const handleCancelDelete = () => {
     setDeleteDialogOpen(false);
-    setSelectedFileKey(null);
+    setSelectedPatientId(null);
     dispatch(setSnackbar({ open: true, message: "Delete operation cancelled", severity: "info" }));
   };
 
@@ -250,7 +256,7 @@ function PatientTable() {
   // View study handler
   const handleViewStudy = (row) => {
     dispatch(setPatient(row));
-    navigate(`/app/workspace/patient/${row['00100020']}?fileKey=${row.FileKey.slice(0,-1)}`); // Remove trailing slash
+    navigate(`/app/workspace/patient/${row.patient_id}`); // Remove trailing slash
   };
 
   // Data fetching instantly after the component mounts
@@ -262,7 +268,8 @@ function PatientTable() {
       setLoading(true);
 
       if (!localStorage.getItem('patientData')) {
-        const fetchedData = await handleDicomDataFetching(userId);
+        const token = auth.tokens?.access_token
+        const fetchedData = await handleDicomDataFetching(userId, token);
   
         // Check if data exists
         if (fetchedData.length === 0) {
@@ -270,11 +277,14 @@ function PatientTable() {
         } else {
           setDataExists(true);
         }
+
+        console.log("Here's the fetchedData")
+        console.log(fetchedData.patients)
   
         // Dispatch the fetched data to Redux
-        dispatch(setDicomData(fetchedData));
+        dispatch(setDicomData(fetchedData['patients']));
   
-        localStorage.setItem('patientData', JSON.stringify(fetchedData));
+        localStorage.setItem('patientData', JSON.stringify(fetchedData.patients));
       } else {
         const cachedData = JSON.parse(localStorage.getItem('patientData'));
         dispatch(setDicomData(cachedData));
@@ -299,7 +309,7 @@ function PatientTable() {
       
       // Apply active filters
       const matchesFilters = activeFilters.length === 0 || 
-        activeFilters.some(filter => row['00080060'] === filter);
+        activeFilters.some(filter => row.Modality === filter);
       
       return matchesSearch && matchesFilters;
     });
@@ -311,7 +321,7 @@ function PatientTable() {
         let bValue = b[sortConfig.key];
         
         // Handle special cases for formatting
-        if (sortConfig.key === 'PatientName') {
+        if (sortConfig.key === 'name') {
           aValue = formatName(aValue);
           bValue = formatName(bValue);
         } else if (sortConfig.key === 'StudyDate') {
@@ -336,7 +346,7 @@ function PatientTable() {
 
   // Get unique modalities for filter menu
   const uniqueModalities = React.useMemo(() => {
-    return [...new Set(rows.map(row => row['00080060']))].filter(Boolean);
+    return [...new Set(rows.map(row => row.Modality))].filter(Boolean);
   }, [rows]);
 
   // Check if there are search/filter/sort active
@@ -595,7 +605,7 @@ function PatientTable() {
                                       size="small"
                                       color="text.primary"
                                       onClick={(e) => {
-                                          handleOpenDeleteDialog(e, row.FileKey);
+                                          handleOpenDeleteDialog(e, row.patient_id);
                                       }}
                                     >
                                       <DeleteIcon fontSize="small" color="error" />
@@ -610,27 +620,27 @@ function PatientTable() {
                           let chipColor;
 
                           // Format specific columns
-                          if (column.id === "00100010") {
+                            if (column.id === "name") {
                             displayValue = formatName(value);
-                          } else if (column.id === "00080020") {
+                            } else if (column.id === "LatestStudyDate") {
                             displayValue = formatDate(value);
-                          } else if (column.id === "00101010"){
+                            } else if (column.id === "age") {
                             displayValue = value ? formatAge(value) : '—';
-                          } else if (column.id === "00100040") {
+                            } else if (column.id === "sex") {
                             return (
                               <TableCell key={column.id} align={column.align}>
-                                <Tooltip title={value === 'M' ? 'Male' : value === 'F' ? 'Female' : 'Other/Unknown'}>
-                                  {value === 'M' ? (
-                                    <MaleIcon sx={{ color: "rgb(3, 34, 211)" }} />
-                                  ) : value === 'F' ? (
-                                    <FemaleIcon sx={{ color: 'rgb(215, 42, 94)' }} />
-                                  ) : (
-                                    <Typography>{value || '—'}</Typography>
-                                  )}
-                                </Tooltip>
+                              <Tooltip title={value === 'M' ? 'Male' : value === 'F' ? 'Female' : 'Other/Unknown'}>
+                                {value === 'M' ? (
+                                <MaleIcon sx={{ color: "rgb(3, 34, 211)" }} />
+                                ) : value === 'F' ? (
+                                <FemaleIcon sx={{ color: 'rgb(215, 42, 94)' }} />
+                                ) : (
+                                <Typography>{value || '—'}</Typography>
+                                )}
+                              </Tooltip>
                               </TableCell>
                             );
-                          } else if (column.id === "00080060") {
+                          } else if (column.id === "modality") {
                             chipColor = getModalityColor(value);
                             return (
                               <TableCell key={column.id} align={column.align}>

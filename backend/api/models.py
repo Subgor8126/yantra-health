@@ -28,6 +28,7 @@ class Patient(models.Model):
     sex = models.TextField(blank=True, null=True)
     age = models.TextField(blank=True, null=True)
     weight = models.TextField(blank=True, null=True)
+    ethnicity = models.TextField(blank=True, null=True)
     birth_date = models.TextField(blank=True, null=True)
     extra_json = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -71,8 +72,6 @@ class Series(models.Model):
     series_description = models.TextField(blank=True, null=True)
     modality = models.TextField(blank=True, null=True)
     body_part_examined = models.TextField(blank=True, null=True)
-    number_of_instances = models.IntegerField(blank=True, null=True)
-    sop_instance_uid_list = models.JSONField(blank=True, null=True)  # For TEXT[] array
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

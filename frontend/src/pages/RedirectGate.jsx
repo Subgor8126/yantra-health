@@ -5,6 +5,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 
 const RedirectGate = () => {
   const auth = useAuthCustom();
+  const token = auth.tokens?.access_token
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +22,13 @@ const RedirectGate = () => {
         console.log(`🎯 RedirectGate: User ID: ${user_id}, Email: ${email}`);
 
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/check-user-exists?user_id=${user_id}`);
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/check-user-exists`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            }
+          });
           const { exists } = await res.json();
             console.log(`🎯 User exists: ${exists}`);
 

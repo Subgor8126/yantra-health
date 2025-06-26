@@ -8,7 +8,12 @@ from api.views import (
     delete_data_by_file_key,
     print_something,
     check_user_exists,
-    create_user
+    create_user,
+    get_user,
+    get_patients,
+    get_studies,
+    delete_studies,
+    delete_patients
 )
 
 # Services imports
@@ -24,8 +29,13 @@ urlpatterns = [
     path("upload-dicom", upload_dicom, name="upload-dicom"),
     path("get-dicom-metadata", get_dicom_metadata, name="get-dicom-metadata"),
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
+    path("delete-patients", delete_patients, name="delete-patients"),
+    path("delete-studies", delete_studies, name="delete-studies"),
     path("check-user-exists", check_user_exists, name="check-user-exists"),
     path("create-user", create_user, name="create-user"),
+    path("get-user", get_user, name="get-user"),
+    path("get-patients", get_patients, name="get-patients"),
+    path("get-studies", get_studies, name="get-studies"),
     path("print-something", print_something, name="print-something"),
     path("stats", get_stats, name="stats"),
     path("", api_only_root)

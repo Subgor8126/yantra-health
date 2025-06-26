@@ -11,6 +11,7 @@ import { setSnackbar } from "../redux/slices/snackbarSlice";
 
 function AppHome() {
   const auth = useAuthCustom();
+  const token = auth.tokens?.access_token
   const dispatch = useDispatch();
 
   const [stats, setStats] = useState(null);
@@ -27,7 +28,12 @@ function AppHome() {
       if (statsData) {
         setStats(JSON.parse(statsData));
       } else {
-        fetch(`${import.meta.env.VITE_API_URL}/api/stats?userId=${auth.userId}`)
+        fetch(`${import.meta.env.VITE_API_URL}/api/stats`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
           .then(res => res.json())
           .then(data => {
             setStats(data);
@@ -49,17 +55,31 @@ function AppHome() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
+      <Box sx={{ 
+        mb: 6, 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+      }}>
+        <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1 }}>
             Dashboard
           </Typography>
+          <Link to="/app/workspace" style={{ textDecoration: 'none' }}>
+              <Button 
+                variant="contained" 
+                color="secondary"
+                startIcon={<DashboardIcon />}
+              >
+                Go To Workspace
+              </Button>
+            </Link>
         </Box>
       </Box>
 
       {/* Workspace + Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 6 }}>
-        {/* Workspace Card */}
+        {/* Workspace Card
         <Grid item xs={12} md={6}>
           <Paper 
             elevation={2}
@@ -85,7 +105,7 @@ function AppHome() {
               </Button>
             </Link>
           </Paper>
-        </Grid>
+        </Grid> */}
         
         {/* Stats Card */}
         {!auth.isGuest ? (
@@ -103,29 +123,29 @@ function AppHome() {
               borderRadius: '50px',
             }}
           >
-            <Typography variant="h5" sx={{ mb: 2 }}>My Data Overview</Typography>
+            <Typography variant="h5" sx={{ mb: 2 }}>Uploaded Data Stats</Typography>
 
             {stats ? (
               <>
                 <Grid container spacing={1}>
                   <Grid item xs={6}>
-                    <Typography variant="body2">🧪 Total Instances</Typography>
+                    <Typography variant="body2">Total Instances</Typography>
                     <Typography variant="h6">{stats.totalInstances}</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">🗂 Total Studies</Typography>
+                    <Typography variant="body2">Total Studies</Typography>
                     <Typography variant="h6">{stats.totalStudies}</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">⏳ Avg Study Size</Typography>
+                    <Typography variant="body2">Avg Study Size</Typography>
                     <Typography variant="h6">{stats.averageStudySizeMB.toFixed(2)} MB</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="body2">⬆️ Largest Study</Typography>
+                    <Typography variant="body2">Largest Study</Typography>
                     <Typography variant="h6">{stats.largestStudySizeMB.toFixed(2)} MB</Typography>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="body2">🕓 Last Upload</Typography>
+                    <Typography variant="body2">Last Upload</Typography>
                     <Typography variant="h6">{new Date(stats.mostRecentUpload).toLocaleString()} UTC</Typography>
                   </Grid>
                 </Grid>
