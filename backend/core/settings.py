@@ -175,9 +175,7 @@ STATIC_URL = '/static/'
 # Template files are html files. Static files are anything else, including css and js.
 # If you look closely, your index.html is at the root of the "react" directory, and everything else is in "react/assets".
 # Hence, we point STATICFILES_DIRS to BASE_DIR / 'core/static/react/assets'.
-STATICFILES_DIRS = [
-    BASE_DIR / 'core/static/react/',  # Path to the React static files
-]
+STATICFILES_DIRS = []
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 

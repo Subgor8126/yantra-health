@@ -30,7 +30,10 @@ const RedirectGate = () => {
             }
           });
           const { exists } = await res.json();
-            console.log(`🎯 User exists: ${exists}`);
+          console.log(`🎯 User exists: ${exists}`);
+
+          // const exists = false;
+
 
           if (exists) {
             navigate('/app');

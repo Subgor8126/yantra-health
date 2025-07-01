@@ -1,12 +1,13 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from api.services import get_s3_client, get_user_id_from_request_token
+from api.services import get_s3_client, get_user_id_from_request_token, start_ahi_import
 from datetime import datetime
 import pydicom
 import os
 import traceback
-from api.models import User, Patient, Study, Series, Instance
+from api.models import User, Patient, Study, Series, Instance, UserSeriesAccess
 from io import BytesIO
+import uuid
 
 
 def get_dicom_value(dicom_data, attribute, default=None):
@@ -83,10 +84,15 @@ def upload_dicom(request):
             defaults={"email": None, "full_name": None, "role": None}
         )
 
+        existing_series = Series.objects.filter(series_instance_uid=series_instance_uid).first()
+
+        if existing_series:
+            UserSeriesAccess.objects.get_or_create(user=user_obj, series=existing_series)
+            return JsonResponse( {'message': 'Series already exists in the community database, you have been granted access to it' }, status=200)
+
         patient_obj, _ = Patient.objects.get_or_create(
             patient_id=patient_id,
             defaults={
-                "user": user_obj,
                 "name": get_dicom_value(first_ds, "PatientName"),
                 "sex": get_dicom_value(first_ds, "PatientSex"),
                 "age": get_dicom_value(first_ds, "PatientAge"),
@@ -101,7 +107,6 @@ def upload_dicom(request):
             study_instance_uid=study_instance_uid,
             defaults={
                 "patient": patient_obj,
-                "user": user_obj,
                 "study_id": get_dicom_value(first_ds, "StudyID"),
                 "study_date": get_dicom_value(first_ds, "StudyDate"),
                 "study_time": get_dicom_value(first_ds, "StudyTime"),
@@ -116,12 +121,14 @@ def upload_dicom(request):
 
         series_obj, _ = Series.objects.get_or_create(
             series_instance_uid=series_instance_uid,
+            user=user_obj,
             defaults={
                 "study": study_obj,
                 "series_number": get_dicom_value(first_ds, "SeriesNumber"),
                 "series_description": get_dicom_value(first_ds, "SeriesDescription"),
                 "modality": get_dicom_value(first_ds, "Modality"),
                 "body_part_examined": get_dicom_value(first_ds, "BodyPartExamined")
+                # update record without healthimaging_imageset_id which will be updated later in the file
             }
         )
 
@@ -142,6 +149,7 @@ def upload_dicom(request):
 
             Instance.objects.update_or_create(
                 sop_instance_uid=sop_uid,
+                user=user_obj,
                 defaults={
                     "series": series_obj,
                     "study": study_obj,
@@ -167,8 +175,18 @@ def upload_dicom(request):
                     "total_size_bytes": file_size
                 }
             )
+            
+        s3_key_upto_series="/".join(s3_key.split('/')[:-1])
+        
+        try:
+            import_response = start_ahi_import(bucket, s3_key_upto_series)
+            healthimaging_import_job_id = import_response["jobId"]
+        except Exception as e:
+            return JsonResponse({ "error": str(e) }, status=500)
 
-        return JsonResponse({"message": "Study uploaded successfully"})
+
+
+        return JsonResponse({"message": "Study uploaded successfully"}, status=200)
 
     except Exception as e:
         print("Upload failed due to unexpected error:")

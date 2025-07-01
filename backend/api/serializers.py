@@ -1,47 +1,75 @@
 from rest_framework import serializers
-from .models import User, Patient, Study, Series, Instance
+from .models import (
+    User,
+    Patient,
+    Study,
+    Series,
+    Instance,
+    UserSeriesAccess
+)
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the User model.
-    Converts User model instances into JSON format and validates data for creating or updating User objects.
     """
     class Meta:
         model = User
         fields = '__all__'
 
+
 class PatientSerializer(serializers.ModelSerializer):
     """
     Serializer for the Patient model.
-    Handles serialization and deserialization of Patient model instances.
     """
     class Meta:
         model = Patient
         fields = '__all__'
 
+
 class StudySerializer(serializers.ModelSerializer):
     """
     Serializer for the Study model.
-    Facilitates conversion of Study model instances to and from JSON format.
+    Includes nested Patient reference.
     """
+    patient = PatientSerializer(read_only=True)
+
     class Meta:
         model = Study
         fields = '__all__'
 
+
+class InstanceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Instance model.
+    Represents individual SOP Instances belonging to a Series.
+    """
+    class Meta:
+        model = Instance
+        fields = '__all__'
+
+
 class SeriesSerializer(serializers.ModelSerializer):
     """
     Serializer for the Series model.
-    Manages serialization and validation for Series model instances.
+    Includes nested Study reference and instances.
     """
+    study = StudySerializer(read_only=True)
+    instances = InstanceSerializer(many=True, read_only=True)
+
     class Meta:
         model = Series
         fields = '__all__'
 
-class InstanceSerializer(serializers.ModelSerializer):  
+
+class UserSeriesAccessSerializer(serializers.ModelSerializer):
     """
-    Serializer for the Instance model.
-    Provides functionality for serializing and deserializing Instance model data.
+    Serializer for the UserSeriesAccess model.
+    Includes user and series details.
     """
+    user = UserSerializer(read_only=True)
+    series = SeriesSerializer(read_only=True)
+
     class Meta:
-        model = Instance
+        model = UserSeriesAccess
         fields = '__all__'
