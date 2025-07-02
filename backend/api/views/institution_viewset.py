@@ -1,7 +1,8 @@
-from rest_framework import viewsets
-from api.models import Institution
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from api.models import Institution, User
 from api.serializers import InstitutionSerializer
-from api.views import TokenRequired
+from .TokenRequired import TokenRequired
 
 class InstitutionViewSet(viewsets.ModelViewSet):
     queryset = Institution.objects.all()
