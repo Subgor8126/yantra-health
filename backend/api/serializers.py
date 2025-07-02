@@ -1,22 +1,65 @@
 from rest_framework import serializers
 from .models import (
     User,
+    Institution,
+    InstitutionUser,
     Patient,
     Study,
     Series,
-    Instance,
-    UserSeriesAccess
+    Instance
 )
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the User model.
-    """
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            'user_id',
+            'email',
+            'full_name',
+            'user_type',
+            'specialty',
+            'license_id',
+            'created_at',
+            'onboarding_complete'
+        ]
+        read_only_fields = ['user_id', 'created_at']
 
+class InstitutionSerializer(serializers.ModelSerializer):
+    admin_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Institution
+        fields = [
+            'institution_id',
+            'name',
+            'institution_type',
+            'country',
+            'city',
+            'contact_email',
+            'contact_phone',
+            'accreditation_id',
+            'admin_user',
+            'healthimaging_datastore_id',
+            'provisioned_at'
+        ]
+        read_only_fields = ['institution_id', 'provisioned_at', 'healthimaging_datastore_id']
+        
+
+class InstitutionUserSerializer(serializers.ModelSerializer):
+    institution = InstitutionSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = InstitutionUser
+        fields = [
+            'id',
+            'institution',
+            'user',
+            'role',
+            'joined_at'
+        ]
+        read_only_fields = ['id', 'joined_at']
 
 class PatientSerializer(serializers.ModelSerializer):
     """
@@ -62,14 +105,14 @@ class SeriesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserSeriesAccessSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the UserSeriesAccess model.
-    Includes user and series details.
-    """
-    user = UserSerializer(read_only=True)
-    series = SeriesSerializer(read_only=True)
+# class UserSeriesAccessSerializer(serializers.ModelSerializer):
+#     """
+#     Serializer for the UserSeriesAccess model.
+#     Includes user and series details.
+#     """
+#     user = UserSerializer(read_only=True)
+#     series = SeriesSerializer(read_only=True)
 
-    class Meta:
-        model = UserSeriesAccess
-        fields = '__all__'
+#     class Meta:
+#         model = UserSeriesAccess
+#         fields = '__all__'

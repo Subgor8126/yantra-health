@@ -21,7 +21,7 @@ def get_stats(request):
     )
     items = response.get('Items', [])
 
-    print(items)
+    # print(items)
 
     total_instances = 0
     total_studies = 0

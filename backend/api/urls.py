@@ -1,6 +1,8 @@
 # Django imports
-from django.urls import path
+from django.urls import path, include
 from django.http import JsonResponse
+
+from rest_framework.routers import DefaultRouter
 
 # Views imports
 from api.views import (
@@ -13,19 +15,26 @@ from api.views import (
     get_patients,
     get_studies,
     delete_studies,
-    delete_patients
+    delete_patients,
 )
+
+from api.views.user_viewset import UserViewSet
 
 # Services imports
 from api.services import (
     get_dicom_metadata,
     get_stats
 )
+from api.views import user_viewset
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename="user")
 
 def api_only_root(request):
     return JsonResponse({"message": "Backend API is running."})
 
 urlpatterns = [
+    path('', include(router.urls)),
     path("upload-dicom", upload_dicom, name="upload-dicom"),
     path("get-dicom-metadata", get_dicom_metadata, name="get-dicom-metadata"),
     path("delete-data-by-file-key", delete_data_by_file_key, name="delete-data-by-file-key"),
